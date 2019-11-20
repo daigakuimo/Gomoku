@@ -11,7 +11,9 @@
 int board[BOARD_MAX][BOARD_MAX] = {{0}};
 
 void display();
+void decisionMyPut(char *input);
 int  insertBoard(char *data, int player);
+
 
 int main(int argc, char *argv[]) {	
 
@@ -68,44 +70,22 @@ int main(int argc, char *argv[]) {
 		}
 		
 		char input[256];
-		// scanf("%s",input);
-
-		int my_x, my_y = 99;
-		while(1)
-		{
-		
-			srand((unsigned int)time(NULL));
-			my_x = rand() % 15 + 1;
-
-			srand((unsigned int)time(NULL) + 1);
-			my_y = rand() % 15 + 1;
-
-			if(board[my_y - 1][my_x - 1] == 0){
-				break;
-			}
-		}
-
-		sprintf(input,"%d,%d",my_x,my_y);
-		printf("my_x = %d, my_y = %d\n", my_x, my_y);
-
+		decisionMyPut(input);
 		send(s, input, strlen(input), 0);
 		
 		insertBoard(input,2);
-		
 		display();
 
 	}
 
 	// Windows でのソケットの終了
-
 	closesocket(s);
-
 	WSACleanup();
-
 	return 0;
 
 }
 
+//盤面を表示
 void display()
 {
 	int i,j = 0;
@@ -113,19 +93,43 @@ void display()
 	{
 		for(j = 0; j<BOARD_MAX; j++)
 		{
-			printf("%d ",board[j][i]);
+			if(board[j][i] == 0) printf("- ",board[j][i]);
+			if(board[j][i] == 1) printf("o ",board[j][i]);
+			if(board[j][i] == 2) printf("x ",board[j][i]);
 		}
 		printf("\n");	
 	}
 	printf("\n\n");
 }
 
+//自分の手を決める
+void decisionMyPut(char *input)
+{
+	int my_x, my_y = 99;
+	while(1)
+	{
+		srand((unsigned int)time(NULL));
+		my_x = rand() % 15 + 1;
+
+		srand((unsigned int)time(NULL) + 1);
+		my_y = rand() % 15 + 1;
+
+		if(board[my_y - 1][my_x - 1] == 0){
+			break;
+		}
+	}
+
+	sprintf(input,"%d,%d",my_x,my_y);
+}
+
+//手をboard[][]に入力
 int insertBoard(char *data, int player)
 {
 	int x = 99;
 	int y = 99;
 	char *token;
 
+	//"end"が入力されたら終了
 	if(strcmp(data,"end") == 0){
 		return END;
 	}
