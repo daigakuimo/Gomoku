@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.php": "php",
+        "forbiddenmove.h": "c"
+    }
+}

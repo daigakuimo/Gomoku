@@ -4,10 +4,13 @@
 #include <ctype.h>
 #include <time.h>
 #include <winsock2.h>
+#include "move.h"
+#include "forbiddenMove.h"
 
 #define BOARD_MAX 15
 #define END 1
 #define CONTINUE 2
+
 int board[BOARD_MAX][BOARD_MAX] = {{0}};
 
 int  init(char *a[],SOCKET *s);
