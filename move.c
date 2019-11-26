@@ -5,3 +5,21 @@
 #include <winsock2.h>
 #include "move.h"
 #include "forbiddenMove.h"
+
+void move()
+{
+
+    
+}
+
+int  maxLevel(int limit)
+{
+
+
+}
+
+int  minLevel(int limit)
+{
+
+
+}
