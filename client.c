@@ -6,12 +6,13 @@
 #include <winsock2.h>
 #include "move.h"
 #include "forbiddenMove.h"
+#include "parameter.h"
 
-#define BOARD_MAX 15
 #define END 1
 #define CONTINUE 2
 
-int board[BOARD_MAX][BOARD_MAX] = {{0}};
+extern int board[BOARD_MAX][BOARD_MAX];
+
 
 int  init(char *a[],SOCKET *s);
 void display();
@@ -20,6 +21,14 @@ int  insertBoard(char *data, int player);
 
 
 int main(int argc, char *argv[]) {	
+
+	//配列初期化
+	int i,j;
+	for(i = 0; i < BOARD_MAX; i++){
+		for(j = 0; j < BOARD_MAX; j++){
+			board[i][j] = 0;
+		}
+	}
 
 	//サーバーに接続
 	SOCKET s;

@@ -9,3 +9,4 @@
 void move();
 int  maxLevel(int limit);
 int  minLevel(int limit);
+int  evaluation(int x, int y);
