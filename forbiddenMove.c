@@ -5,3 +5,6 @@
 #include <winsock2.h>
 #include "move.h"
 #include "forbiddenMove.h"
+#include "parameter.h"
+
+extern int board[BOARD_MAX][BOARD_MAX];
