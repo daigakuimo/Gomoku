@@ -6,7 +6,9 @@
 #define MOVE_MY_CHECKMATE        20    //王手
 #define MOVE_MY_FORBIDDEN_MOVE   0     //禁じ手
 
-void move();
-int  maxLevel(int limit);
-int  minLevel(int limit);
+#define SEARCH_DEPTH             3     //探索の深さ
+
+
+void move(char *input);
+int  minMax(int level, int player, int x, int y);
 int  evaluation(int x, int y);

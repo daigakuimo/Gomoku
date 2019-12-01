@@ -1,10 +1,6 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <time.h>
-#include <winsock2.h>
 #include "move.h"
 #include "forbiddenMove.h"
 #include "parameter.h"
 
-extern int board[BOARD_MAX][BOARD_MAX];
+extern int board[BOARD_MAX][BOARD_MAX];        //ゲーム用?
+extern int tempBoard[BOARD_MAX][BOARD_MAX];    //探索用配列

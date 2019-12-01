@@ -1,17 +1,13 @@
 //http://blog.livedoor.jp/akf0/archives/51585502.html
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <time.h>
-#include <winsock2.h>
 #include "move.h"
 #include "forbiddenMove.h"
 #include "parameter.h"
 
-#define END 1
-#define CONTINUE 2
+#define END      100
+#define CONTINUE 110
 
 extern int board[BOARD_MAX][BOARD_MAX];
+extern int tempBoard[BOARD_MAX][BOARD_MAX];
 
 
 int  init(char *a[],SOCKET *s);
@@ -26,7 +22,8 @@ int main(int argc, char *argv[]) {
 	int i,j;
 	for(i = 0; i < BOARD_MAX; i++){
 		for(j = 0; j < BOARD_MAX; j++){
-			board[i][j] = 0;
+			board[i][j]     = 0;
+			tempBoard[i][j] = 0;
 		}
 	}
 
@@ -53,7 +50,7 @@ int main(int argc, char *argv[]) {
 		recv(s, buffer, 1024, 0);
 		printf("→ %s\n\n", buffer);
 		
-		controller = insertBoard(buffer,1);
+		controller = insertBoard(buffer,ENEMY);
 		display();
 
 		if(controller == END){
@@ -65,7 +62,7 @@ int main(int argc, char *argv[]) {
 		decisionMyPut(input);
 		send(s, input, strlen(input), 0);
 		
-		insertBoard(input,2);
+		insertBoard(input,AI);
 		display();
 
 	}
@@ -77,7 +74,15 @@ int main(int argc, char *argv[]) {
 
 }
 
-//サーバ接続
+/* ====================================================================== */
+/**
+ * @brief  サーバー側に接続(TCP通信)
+ *
+ * @param[in]     a  IPアドレス・ポート番号
+ * @param[in,out] s  ソケット
+ *
+ */
+/* ====================================================================== */
 int init(char *a[], SOCKET *s)
 {
     //接続するサーバの情報の構造体を用意
@@ -107,7 +112,11 @@ int init(char *a[], SOCKET *s)
 	
 }
 
-//盤面を表示
+/* ====================================================================== */
+/**
+ * @brief  盤面を表示
+ */
+/* ====================================================================== */
 void display()
 {
 	int i,j = 0;
@@ -124,7 +133,7 @@ void display()
 	printf("\n\n");
 }
 
-//自分の手を決める
+//自分の手を決める 後で消す
 void decisionMyPut(char *input)
 {
 	int my_x, my_y = 99;
@@ -144,7 +153,16 @@ void decisionMyPut(char *input)
 	sprintf(input,"%d,%d",my_x,my_y);
 }
 
-//手をboard[][]に入力
+/* ====================================================================== */
+/**
+ * @brief  打たれた手をboardに格納
+ *
+ * @param[in] data   打たれた手
+ * @param[in] player どちらのプレイヤーが打ったか
+ *
+ * @return  ゲームの終了判定結果(整数)
+ */
+/* ====================================================================== */
 int insertBoard(char *data, int player)
 {
 	int x = 99;
@@ -166,7 +184,11 @@ int insertBoard(char *data, int player)
 		break;
 	}
 	
-	if(x != 99) board[x-1][y-1] = player;
+	if(x != 99)
+	{
+		board[x-1][y-1] = player;
+		tempBoard[x-1][y-1] = player;
+	}
 
 	return CONTINUE;
 }
