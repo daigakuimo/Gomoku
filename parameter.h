@@ -8,9 +8,9 @@
 #include <limits.h>
 
 #define BOARD_MAX 15
-#define EMPTY    0
-#define ENEMY    1
-#define AI       2
+#define EMPTY     0
+#define ENEMY     1
+#define AI        2
 
 int board[BOARD_MAX][BOARD_MAX];
 int tempBoard[BOARD_MAX][BOARD_MAX];

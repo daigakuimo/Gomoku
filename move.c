@@ -89,7 +89,7 @@ int  minMax(int level, int player, int x, int y)
     //探索する深さの制限に達すると手を評価する
     if(level == 0)
     {
-        return eveluation(x,y);
+        return eveluation(x,y,player);
     }
 
     int y,x;
@@ -104,7 +104,7 @@ int  minMax(int level, int player, int x, int y)
             tempBoard[y][x] = player;
 
             //ミニマックス法で評価値を得る
-            score = minMax(SEARCH_DEPTH, nextPlayer, x, y);
+            score = minMax(level-1, nextPlayer, x, y);
 
             if(player == AI)
             {
@@ -151,7 +151,14 @@ int  minMax(int level, int player, int x, int y)
  * @return  評価値(整数)
  */
 /* ====================================================================== */
-int evaluation(int x, int y)
+int evaluation(int putX, int putY, int player)
 {
+    int score;
+    int maxScore    = INT_MIN;
+    int minScore    = INT_MAX;
+    int returnScore = 0;
+
     
+
+    return returnScore;
 }

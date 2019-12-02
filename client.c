@@ -1,7 +1,7 @@
 //http://blog.livedoor.jp/akf0/archives/51585502.html
+#include "parameter.h"
 #include "move.h"
 #include "forbiddenMove.h"
-#include "parameter.h"
 
 #define END      100
 #define CONTINUE 110
