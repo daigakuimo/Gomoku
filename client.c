@@ -8,8 +8,9 @@
 
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
+extern int battingFirstPlayer;
 
-
+void checkBattingFirst();
 int  init(char *a[],SOCKET *s);
 void display();
 void decisionMyPut(char *input);
@@ -27,6 +28,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	//先攻か後攻
+	checkBattingFirst();
+
 	//サーバーに接続
 	SOCKET s;
 	init(argv, &s);
@@ -40,7 +44,23 @@ int main(int argc, char *argv[]) {
 	char input[256];
 	scanf("%s",input);	
 	send(s, input, strlen(input), 0);
-	
+
+	//先攻だったら真ん中に手を打つ
+	if(battingFirstPlayer == AI)
+	{
+		char buffer[1024];
+		//サーバからデータを受信(startを受け取る)
+		recv(s, buffer, 1024, 0);
+		printf("→ %s\n\n", buffer);
+
+		char input[256];
+		sprintf(input,"%d,%d", 8, 8);
+		send(s, input, strlen(input), 0);
+		
+		insertBoard(input,AI);
+		display();
+	}
+
 	while(1)
 	{	
 		int controller = 2;
@@ -72,6 +92,40 @@ int main(int argc, char *argv[]) {
 	WSACleanup();
 	return 0;
 
+}
+
+/* ====================================================================== */
+/**
+ * @brief  先攻が自分か敵か決める
+ */
+/* ====================================================================== */
+void checkBattingFirst()
+{
+	int errorFlag = 1;
+
+	while(errorFlag == 1)
+	{
+		char checkTurn[256];
+		printf("black or white\n");
+		scanf("%s",checkTurn);
+
+		if(strcmp(checkTurn,"black") == 0)
+		{
+			battingFirstPlayer = AI;
+			errorFlag = 0;
+		}
+		else if(strcmp(checkTurn,"white") == 0)
+		{
+			battingFirstPlayer = ENEMY;
+			errorFlag = 0;
+		}
+
+		if(errorFlag == 1)
+		{
+			printf("one more input\n");
+		}
+	}
+	
 }
 
 /* ====================================================================== */
@@ -124,9 +178,9 @@ void display()
 	{
 		for(j = 0; j<BOARD_MAX; j++)
 		{
-			if(board[j][i] == 0) printf("- ",board[j][i]);
-			if(board[j][i] == 1) printf("o ",board[j][i]);
-			if(board[j][i] == 2) printf("x ",board[j][i]);
+			if(board[i][j] == 0) printf("- ",board[i][j]);
+			if(board[i][j] == 1) printf("o ",board[i][j]);
+			if(board[i][j] == 2) printf("x ",board[i][j]);
 		}
 		printf("\n");	
 	}
@@ -137,6 +191,7 @@ void display()
 void decisionMyPut(char *input)
 {
 	int my_x, my_y = 99;
+	int put_x,put_y = 99;
 	while(1)
 	{
 		srand((unsigned int)time(NULL));
@@ -145,7 +200,9 @@ void decisionMyPut(char *input)
 		srand((unsigned int)time(NULL) + 1);
 		my_y = rand() % 15 + 1;
 
-		if(board[my_y - 1][my_x - 1] == 0){
+		put_x = my_x -1;
+		put_y = my_y -1;
+		if(board[put_y][put_x] == 0){
 			break;
 		}
 	}
@@ -186,9 +243,10 @@ int insertBoard(char *data, int player)
 	
 	if(x != 99)
 	{
-		board[x-1][y-1] = player;
-		tempBoard[x-1][y-1] = player;
+		board[y-1][x-1] = player;
+		tempBoard[y-1][x-1] = player;
 	}
 
 	return CONTINUE;
 }
+

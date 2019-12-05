@@ -106,7 +106,7 @@ int  minMax(int level, int player, int x, int y)
             //ミニマックス法で評価値を得る
             score = minMax(level-1, nextPlayer, x, y);
 
-            if(player == AI)
+            if(player == ENEMY)
             {
                 //評価値が一番低い手を選ぶ
                 if(score < minScore)
@@ -129,7 +129,7 @@ int  minMax(int level, int player, int x, int y)
         }
     }
 
-    if(player == AI)
+    if(player == ENEMY)
     {
         returnScore = minScore;
     }
