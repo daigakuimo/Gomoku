@@ -15,22 +15,22 @@ int main()
 		for(j = 0; j < BOARD_MAX; j++){
 			if((i==6&&j==11)||(i==8&&j==9)||(i==10&&j==7)||(i==9&&j==8)||(i==10&&j==8)||(i==11&&j==8)||(i==8&&j==8)|(i==8&&j==7)||(i==7&&j==6)||(i==6&&j==5))
 			{
-			    board[i][j]     = 1;
+			    board[j][i]     = 1;
 			    tempBoard[i][j] = 1;
-			}else if((i==5&&j==12)||(i==11&&j==6)||(i==7&&j==8)||(i==12&&j==8)||(i==10&&j==9)||(i==10&&j==9)||(i==7&&j==10))
+			}else if((i==5&&j==12)||(i==11&&j==6)||(i==7&&j==8)||(i==5&&j==4)||(i==10&&j==9))
 			{
-			    board[i][j]     = 2;
+			    board[j][i]     = 2;
 			    tempBoard[i][j] = 2;
 			}
 			else
 			{
-			    board[i][j]     = 0;
+			    board[j][i]     = 0;
 			    tempBoard[i][j] = 0;
 			}
 		}
 	}
 	display();
-	if(Four(1,8,9) == 1)
+	if(Four(1,9,8) == 1)
 	{
 	    printf("¬Œ÷‚¾‚æ\n");
 	}else
@@ -46,9 +46,9 @@ void display()
 	{
 		for(j = 0; j<BOARD_MAX; j++)
 		{
-			if(board[j][i] == 0) printf("- ",board[j][i]);
-			if(board[j][i] == 1) printf("o ",board[j][i]);
-			if(board[j][i] == 2) printf("x ",board[j][i]);
+			if(board[i][j] == 0) printf("- ",board[i][j]);
+			if(board[i][j] == 1) printf("o ",board[i][j]);
+			if(board[i][j] == 2) printf("x ",board[i][j]);
 		}
 		printf("\n");	
 	}

@@ -28,7 +28,7 @@ int true = 1,false = 0;
  * @brief  盤面に四四があるかの判定
  * 
  * @param[in] player 判定するプレイヤー(先行)
- * @param[in] x,y 盤面上のx座標,盤面上のy座標 (検索する座標)
+ * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
  *
  * @return 判定　true or false
  * 
