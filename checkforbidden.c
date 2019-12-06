@@ -13,24 +13,25 @@ int main()
     	int i,j;
 	for(i = 0; i < BOARD_MAX; i++){
 		for(j = 0; j < BOARD_MAX; j++){
-			if((i==6&&j==11)||(i==8&&j==9)||(i==10&&j==7)||(i==9&&j==8)||(i==10&&j==8)||(i==11&&j==8)||(i==8&&j==8)|(i==8&&j==7)||(i==7&&j==6)||(i==6&&j==5))
+			if((i==9&&j==12)||(i==10&&j==13)||(i==8&&j==11)||(i==8&&j==9)||(i==8&&j==10))
 			{
 			    board[j][i]     = 1;
-			    tempBoard[i][j] = 1;
-			}else if((i==5&&j==12)||(i==11&&j==6)||(i==7&&j==8)||(i==5&&j==4)||(i==10&&j==9))
+			    tempBoard[j][i] = 1;
+			}else if((i==11&&j==14))
 			{
+
 			    board[j][i]     = 2;
-			    tempBoard[i][j] = 2;
+			    tempBoard[j][i] = 2;
 			}
 			else
 			{
 			    board[j][i]     = 0;
-			    tempBoard[i][j] = 0;
+			    tempBoard[j][i] = 0;
 			}
 		}
 	}
 	display();
-	if(Four(1,9,8) == 1)
+	if(Three(1,8,11) == 1)
 	{
 	    printf("¬Œ÷‚¾‚æ\n");
 	}else
@@ -40,6 +41,7 @@ int main()
 
 }
 void display()
+
 {
 	int i,j = 0;
 	for(i = 0; i < BOARD_MAX; i++)

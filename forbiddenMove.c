@@ -38,8 +38,8 @@ int true = 1,false = 0;
 int Four(int player,int x,int y)
 {
     int cnt = 0;
-    if(Four_tate(player,x,y) == true) cnt++;
     if(Four_yoko(player,x,y) == true) cnt++;
+    if(Four_tate(player,x,y) == true) cnt++;
     if(Four_right(player,x,y) == true) cnt++;
     if(Four_left(player,x,y) == true) cnt++;
 
@@ -47,7 +47,31 @@ int Four(int player,int x,int y)
     else return false;
 }
 
-int Four_tate(int player,int x,int y)
+/* ====================================================================== */
+/**
+ * @brief  盤面にが三三があるかの判定
+ * 
+ * @param[in] player 判定するプレイヤー(先行)
+ * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
+ *
+ * @return 判定　true or false
+ * 
+ */
+/* ====================================================================== */
+
+int Three(int player,int x,int y)
+{
+    int cnt = 0;
+    if(Three_yoko(player,x,y) == true) cnt++;
+    if(Three_tate(player,x,y) == true) cnt++;
+    if(Three_right(player,x,y) == true) cnt++;
+    if(Three_left(player,x,y) == true) cnt++;
+
+    if(cnt == 2) return true;
+    else return false;
+}
+
+int Four_yoko(int player,int x,int y)
 {
     int k;
     int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
@@ -82,7 +106,7 @@ int Four_tate(int player,int x,int y)
     return false;
 }
 
-int Four_yoko(int player,int x,int y)
+int Four_tate(int player,int x,int y)
 {
     int k;
     int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
@@ -181,6 +205,146 @@ int Four_left(int player,int x,int y)
 	    if(nashi == 0 && top != EMPTY && bottom != EMPTY) return false;
 
 	    return true;
+	}
+    }
+    
+    return false;
+}
+
+int Three_yoko(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
+
+    for(k = -3;k <= 3;k++)
+    {
+	if(board[y][x+k] == player){
+	    if(x+k-1 >= 0 && maru == 0) top = board[y][x+k-1];
+	    maru++;
+	}
+	else if(maru >= 1 && board[y][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 2)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 3)
+	{
+	    if(x+k+1 < BOARD_MAX) bottom = board[y][x+k+1];
+
+	    if(peke == 1 ) return false;
+	    if(top == EMPTY && bottom == EMPTY) return true;
+
+	    return false;
+	}
+    }
+    
+    return false;
+}
+
+int Three_tate(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
+
+    for(k = -3;k <= 3;k++)
+    {
+	if(board[y+k][x] == player){
+	    if(y+k-1 >= 0 && maru == 0) top = board[y+k-1][x];
+	    maru++;
+	}
+	else if(maru >= 1 && board[y+k][x] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 2)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 3)
+	{
+	    if(y+k+1 < BOARD_MAX) bottom = board[y+k+1][x];
+
+	    if(peke == 1 ) return false;
+	    if(top == EMPTY && bottom == EMPTY) return true;
+
+	    return false;
+	}
+    }
+    
+    return false;
+}
+
+int Three_right(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
+
+    for(k = -3;k <= 3;k++)
+    {
+	if(board[y+k][x+k] == player){
+	    if(y+k-1 >= 0 && x+k-1 >= 0 && maru == 0) top = board[y+k-1][x+k-1];
+	    maru++;
+	}
+	else if(maru >= 1 && board[y+k][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 2)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 3)
+	{
+	    if(y+k+1 < BOARD_MAX && x+k+1 < BOARD_MAX) bottom = board[y+k+1][x+k+1];
+
+	    if(peke == 1 ) return false;
+	    if(top == EMPTY && bottom == EMPTY) return true;
+
+	    return false;
+	}
+    }
+    
+    return false;
+}
+
+int Three_left(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0,top = 0,bottom = 0;
+
+    for(k = -3;k <= 3;k++)
+    {
+	if(board[y-k][x+k] == player){
+	    if(x+k-1 >= 0 && y-k+1 < BOARD_MAX && maru == 0) top = board[y-k+1][x+k-1];
+	    maru++;
+	}
+	else if(maru >= 1 && board[y-k][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 2)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 3)
+	{
+	    if(x+k+1 < BOARD_MAX && y-k-1 >= 0) bottom = board[y-k-1][x+k+1];
+
+	    if(peke == 1 ) return false;
+	    if(top == EMPTY && bottom == EMPTY) return true;
+
+	    return false;
 	}
     }
     
