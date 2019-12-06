@@ -13,11 +13,11 @@ int main()
     	int i,j;
 	for(i = 0; i < BOARD_MAX; i++){
 		for(j = 0; j < BOARD_MAX; j++){
-			if((i==9&&j==12)||(i==10&&j==13)||(i==8&&j==11)||(i==8&&j==9)||(i==8&&j==10))
+			if((i==7&&j==10)||(i==8&&j==9)||(i==9&&j==8)||(i==10&&j==7)||(i==8&&j==7)||(i==8&&j==6)||(i==8&&j==5))
 			{
 			    board[j][i]     = 1;
 			    tempBoard[j][i] = 1;
-			}else if((i==11&&j==14))
+			}else if((i==8&&j==4)||(i==8&&j==10)||(i==6&&j==11))
 			{
 
 			    board[j][i]     = 2;
@@ -31,7 +31,7 @@ int main()
 		}
 	}
 	display();
-	if(Three(1,8,11) == 1)
+	if(forbidden(1,8,9) == 1)
 	{
 	    printf("¬Œ÷‚¾‚æ\n");
 	}else

@@ -12,16 +12,43 @@ int true = 1,false = 0;
  * @brief  禁じ手の判定
  * 
  * @param[in] player 判定するプレイヤー(先行)
+ * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
  *
  * @return 判定　true or false
  * 
  */
 /* ====================================================================== */
 
-/*int forbidden(int player)
+int forbidden(int player,int x,int y)
 {
-    	     
-}*/
+    if(Long(player,x,y) == true) return true;
+    if(Four(player,x,y) == true) return true;
+    if(Three(player,x,y) == true) return true;
+}
+
+/* ====================================================================== */
+/**
+ * @brief  盤面に長連があるかの判定
+ * 
+ * @param[in] player 判定するプレイヤー(先行)
+ * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
+ *
+ * @return 判定　true or false
+ * 
+ */
+/* ====================================================================== */
+
+int Long(int player,int x,int y)
+{
+    int cnt = 0;
+    if(Long_yoko(player,x,y) == true) cnt++;
+    if(Long_tate(player,x,y) == true) cnt++;
+    if(Long_right(player,x,y) == true) cnt++;
+    if(Long_left(player,x,y) == true) cnt++;
+
+    if(cnt == 1) return true;
+    else return false;
+}
 
 /* ====================================================================== */
 /**
@@ -69,6 +96,104 @@ int Three(int player,int x,int y)
 
     if(cnt == 2) return true;
     else return false;
+}
+
+
+
+int Long_yoko(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0;
+
+    for(k = -4;k <= 4;k++)
+    {
+	if(board[y][x+k] == player) maru++;
+	else if(maru >= 1 && board[y][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 1)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 6) return true;
+    }
+    
+    return false;
+}
+
+int Long_tate(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0;
+
+    for(k = -4;k <= 4;k++)
+    {
+	if(board[y+k][x] == player) maru++;
+	else if(maru >= 1 && board[y+k][x] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 1)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 6) return true;
+    }
+    
+    return false;
+}
+
+int Long_right(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0;
+
+    for(k = -4;k <= 4;k++)
+    {
+	if(board[y+k][x+k] == player) maru++;
+	else if(maru >= 1 && board[y+k][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 1)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 6) return true;
+    }
+    
+    return false;
+}
+
+int Long_left(int player,int x,int y)
+{
+    int k;
+    int maru = 0,peke = 0,nashi = 0;
+
+    for(k = -4;k <= 4;k++)
+    {
+	if(board[y-k][x+k] == player) maru++;
+	else if(maru >= 1 && board[y-k][x+k] != EMPTY) peke++;
+	else if(maru >= 1) nashi++;
+
+	if((peke + nashi) == 1)
+	{
+	    maru = 0;
+	    peke = 0; 
+	    nashi = 0;
+	}
+	
+	if(maru == 6) return true;
+    }
+    
+    return false;
 }
 
 int Four_yoko(int player,int x,int y)
