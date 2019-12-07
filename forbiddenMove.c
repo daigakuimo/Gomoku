@@ -22,8 +22,8 @@ int true = 1,false = 0;
 int forbidden(int player,int x,int y)
 {
     if(Long(player,x,y) == true) return true;
-    if(Four(player,x,y) == true) return true;
-    if(Three(player,x,y) == true) return true;
+    if(Four(player,x,y) == 2) return true;
+    if(Three(player,x,y) == 2) return true;
 }
 
 /* ====================================================================== */
@@ -52,12 +52,12 @@ int Long(int player,int x,int y)
 
 /* ====================================================================== */
 /**
- * @brief  盤面に四四があるかの判定
+ * @brief  直前に置いた手によって四が何個出来たかの判定
  * 
  * @param[in] player 判定するプレイヤー(先行)
  * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
  *
- * @return 判定　true or false
+ * @return 0 or 1 or 2 四の数(2の場合は四四)　
  * 
  */
 /* ====================================================================== */
@@ -70,18 +70,19 @@ int Four(int player,int x,int y)
     if(Four_right(player,x,y) == true) cnt++;
     if(Four_left(player,x,y) == true) cnt++;
 
-    if(cnt == 2) return true;
-    else return false;
+    if(cnt == 2) return 2;
+    if(cnt == 1) return 1;
+    if(cnt == 0) return 0;
 }
 
 /* ====================================================================== */
 /**
- * @brief  盤面にが三三があるかの判定
+ * @brief  直前に置いた手によって三が何個出来たかの判定
  * 
  * @param[in] player 判定するプレイヤー(先行)
  * @param[in] x,y 盤面上のx座標,盤面上のy座標 頂点は左上(検索する座標)
  *
- * @return 判定　true or false
+ * @return 0 or 1 or 2 三の数(2の場合は三三)
  * 
  */
 /* ====================================================================== */
@@ -94,8 +95,9 @@ int Three(int player,int x,int y)
     if(Three_right(player,x,y) == true) cnt++;
     if(Three_left(player,x,y) == true) cnt++;
 
-    if(cnt == 2) return true;
-    else return false;
+    if(cnt == 2) return 2;
+    if(cnt == 1) return 1;
+    if(cnt == 0) return 0;
 }
 
 

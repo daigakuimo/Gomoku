@@ -1,4 +1,4 @@
-#include "move.h"
+﻿#include "move.h"
 #include "forbiddenMove.h"
 #include "parameter.h"
 
