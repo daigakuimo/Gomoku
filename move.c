@@ -158,7 +158,143 @@ int evaluation(int putX, int putY, int player)
     int minScore    = INT_MAX;
     int returnScore = 0;
 
+
+    //初期化
+    unsigned char sta[DIRECTION];
+    int row[DIRECTION] = {0};
+    int patern[DIRECTION] = {0};
+    int total[TOTAL_DIRECTION] = {0};
+
+    int i = 0;
+    for(i = 0; i < DIRECTION; i++)
+    {
+        sta[i] = 0x0000;
+    }
+
+    int directionX = 0;
+    int directionY = 1;
+    
+    int direction = 0;
+    for(direction = 0; direction < DIRECTION; direction++)
+    {
+        row[i] = countBlack(sta[i],player,putX,putY,direction);
+    }
+
+    int m = 0;
+    for(m = 0; m < TOTAL_DIRECTION; m++)
+    {
+        total[m] = sta[m] + sta[m + 4] -1;
+    }
+
+
+    
+
+
     
 
     return returnScore;
+}
+
+/* ====================================================================== */
+/**
+ * @brief  打った手から1つの方向の黒の数と状態を得る
+ *
+ * @param[in,out] sta     打った手のある方向による状態
+ * @param[in]             評価したいプレイヤー
+ * @param[in] putX,putY   評価したい手の座標
+ * @param[in] direction   検索したい方向
+ *
+ * @return  黒の数
+ */
+/* ====================================================================== */
+int countBlack(unsigned char sta, int player, int putX, int putY, int direction)
+{
+    int blackCount = 0;
+    int emptyCount = 0;
+    int k = 0;
+    int directionX = 0;
+    int directionY = 0;
+
+    switch(direction)
+    {
+        case 0:
+            directionX = 0;
+            directionY = 1;
+            break;
+        
+        case 1:
+            directionX = 1;
+            directionY = 1;
+            break;
+        case 2:
+            directionX = 1;
+            directionY = 0;
+            break;
+        case 3:
+            directionX = 1;
+            directionY = -1;
+            break;
+        case 4:
+            directionX = 0;
+            directionY = -1;
+            break;
+        case 5:
+            directionX = -1;
+            directionY = -1;
+            break;
+        case 6:
+            directionX = -1;
+            directionY = 0;
+            break;
+        case 7:
+            directionX = -1;
+            directionY = 1;
+            break;
+    }
+
+    for(k = 0; k < MAX_SEARCH; k++)
+    {
+        if(tempBoard[putY + directionY * k][putX + directionX * k] == player)
+        {
+            sta = sta << 2;
+            blackCount++;
+        }
+        else if(tempBoard[putY + directionY * k][putX + directionX * k] == EMPTY)
+        {
+            sta = sta << 2;
+            sta = sta + 0x0001;
+            emptyCount++;
+            if(emptyCount >= 3) break;
+        }
+        else
+        {
+            sta = sta + 0x0400;
+            break;
+        }
+    }
+
+    return blackCount;
+}
+
+/* ====================================================================== */
+/**
+ * @brief  打った手の方向の状態がどのパターンか得る
+ *
+ * @param[in,out] sta     打った手のある方向による状態
+ *
+ * @return  パターン
+ */
+/* ====================================================================== */
+int getPatern(unsigned char sta)
+{
+    int patern;
+
+    switch(sta)
+    {
+        case 0x0000:
+            patern = 0;
+    }
+
+    
+    return patern;
 }

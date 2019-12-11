@@ -12,8 +12,13 @@
 #define MOVE_MY_FORBIDDEN_MOVE   0     //禁じ手
 
 #define SEARCH_DEPTH             3     //探索の深さ
+#define DIRECTION                8     //評価の方向
+#define TOTAL_DIRECTION          4     //
+#define MAX_SEARCH               5     //評価時の石検索の数
 
 
 void move(char *input);
 int  minMax(int level, int player, int x, int y);
 int  evaluation(int x, int y);
+int  countBlack(unsigned char sta, int player, int putX, int putY, int direction);
+int  getPatern(unsigned char sta);

@@ -88,54 +88,54 @@ int displayBoard(char *str, int turn){
 
 int main(int argc, char* argv[]){
 
-  SOCKET s, s1;         //ƒ\ƒPƒbƒg
-  int result;          //–ß‚è’l
+  SOCKET s, s1;         //ï¿½\ï¿½Pï¿½bï¿½g
+  int result;          //ï¿½ß‚ï¿½l
 
-  //Ú‘±‚ğ‹–‰Â‚·‚éƒNƒ‰ƒCƒAƒ“ƒg’[––‚Ìî•ñ
+  //ï¿½Ú‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½[ï¿½ï¿½ï¿½Ìï¿½ï¿½
 
   struct sockaddr_in source;
   char name1[256], name2[256];
 
   memset(name1, '\0', sizeof(name1));
 
-  //‘—MŒ³‚Ì’[––î•ñ‚ğ“o˜^‚·‚é
+  //ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ì’[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½^ï¿½ï¿½ï¿½ï¿½
 
   memset(&source, 0, sizeof(source));
   source.sin_family = AF_INET;
 
-  //ƒ|[ƒg”Ô†‚ÍƒNƒ‰ƒCƒAƒ“ƒgƒvƒƒOƒ‰ƒ€‚Æ‹¤’Ê
+  //ï¿½|ï¿½[ï¿½gï¿½Ôï¿½ï¿½ÍƒNï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Æ‹ï¿½ï¿½ï¿½
 
   source.sin_port = htons(12345);
   source.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //ƒ\ƒPƒbƒg’ÊM‚ÌŠJn€”õ
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½ÊMï¿½ÌŠJï¿½nï¿½ï¿½ï¿½ï¿½
   WSADATA data;
   result = WSAStartup(MAKEWORD(2, 0), &data);
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ƒ\ƒPƒbƒg’ÊM€”õƒGƒ‰[\n");
+    printf("ï¿½\ï¿½Pï¿½bï¿½gï¿½ÊMï¿½ï¿½ï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
 
 
-  //ƒ\ƒPƒbƒg‚Ì¶¬
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½Ìï¿½ï¿½ï¿½
   s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (s < 0){
     printf("%d\n", GetLastError());
-    printf("ƒ\ƒPƒbƒg¶¬ƒGƒ‰[\n");
+    printf("ï¿½\ï¿½Pï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //ƒ\ƒPƒbƒg‚ÌƒoƒCƒ“ƒh
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½Ìƒoï¿½Cï¿½ï¿½ï¿½h
   result = bind(s, (struct sockaddr *)&source, sizeof(source));
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ƒoƒCƒ“ƒhƒGƒ‰[\n");
+    printf("ï¿½oï¿½Cï¿½ï¿½ï¿½hï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //Ú‘±‚Ì‹–‰Â
+  //ï¿½Ú‘ï¿½ï¿½Ì‹ï¿½ï¿½ï¿½
   result = listen(s, 1);
   if (result < 0){
-    printf("Ú‘±‹–‰ÂƒGƒ‰[\n");
+    printf("ï¿½Ú‘ï¿½ï¿½ï¿½ï¿½ÂƒGï¿½ï¿½ï¿½[\n");
   }
 
 
@@ -143,69 +143,69 @@ int main(int argc, char* argv[]){
 
 
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç’ÊM‚ª‚ ‚é‚Ü‚Å‘Ò‹@
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ÊMï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚Å‘Ò‹@
   s1 = accept(s, NULL, NULL);
   if (s1 < 0){
-    printf("‘Ò‹@ƒGƒ‰[\n");
+    printf("ï¿½Ò‹@ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚Öƒf[ƒ^‚ğ‘—M‚·‚é
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½Öƒfï¿½[ï¿½^ï¿½ğ‘—Mï¿½ï¿½ï¿½ï¿½
   result = send(s1, "player1 name =", 20, 0);
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç‘—M‚³‚ê‚½ƒf[ƒ^‚ÌóM
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ç‘—ï¿½Mï¿½ï¿½ï¿½ê‚½ï¿½fï¿½[ï¿½^ï¿½Ìï¿½M
   result = recv(s1, name1, 20, 0);
   if (result < 0){
-    printf("óMƒGƒ‰[\n");
+    printf("ï¿½ï¿½Mï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  printf("%s‚ğóM‚µ‚Ü‚µ‚½\n", name1);
+  printf("%sï¿½ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\n", name1);
 
 
 
-  SOCKET s2, s3;         //ƒ\ƒPƒbƒg
+  SOCKET s2, s3;         //ï¿½\ï¿½Pï¿½bï¿½g
 
-  //Ú‘±‚ğ‹–‰Â‚·‚éƒNƒ‰ƒCƒAƒ“ƒg’[––‚Ìî•ñ
+  //ï¿½Ú‘ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â‚ï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½[ï¿½ï¿½ï¿½Ìï¿½ï¿½
 
   struct sockaddr_in source2;
 
   memset(name2, '\0', sizeof(name2));
 
-  //‘—MŒ³‚Ì’[––î•ñ‚ğ“o˜^‚·‚é
+  //ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ì’[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½^ï¿½ï¿½ï¿½ï¿½
 
   memset(&source2, 0, sizeof(source2));
   source2.sin_family = AF_INET;
 
-  //ƒ|[ƒg”Ô†‚ÍƒNƒ‰ƒCƒAƒ“ƒgƒvƒƒOƒ‰ƒ€‚Æ‹¤’Ê
+  //ï¿½|ï¿½[ï¿½gï¿½Ôï¿½ï¿½ÍƒNï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½vï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Æ‹ï¿½ï¿½ï¿½
 
   source2.sin_port = htons(12346);
   source2.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //ƒ\ƒPƒbƒg’ÊM‚ÌŠJn€”õ
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½ÊMï¿½ÌŠJï¿½nï¿½ï¿½ï¿½ï¿½
   WSADATA data2;
   result = WSAStartup(MAKEWORD(2, 0), &data2);
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ƒ\ƒPƒbƒg’ÊM€”õƒGƒ‰[\n");
+    printf("ï¿½\ï¿½Pï¿½bï¿½gï¿½ÊMï¿½ï¿½ï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //ƒ\ƒPƒbƒg‚Ì¶¬
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½Ìï¿½ï¿½ï¿½
   s2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (s2 < 0){
     printf("%d\n", GetLastError());
-    printf("ƒ\ƒPƒbƒg¶¬ƒGƒ‰[\n");
+    printf("ï¿½\ï¿½Pï¿½bï¿½gï¿½ï¿½ï¿½ï¿½ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //ƒ\ƒPƒbƒg‚ÌƒoƒCƒ“ƒh
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½Ìƒoï¿½Cï¿½ï¿½ï¿½h
   result = bind(s2, (struct sockaddr *)&source2, sizeof(source2));
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ƒoƒCƒ“ƒhƒGƒ‰[\n");
+    printf("ï¿½oï¿½Cï¿½ï¿½ï¿½hï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //Ú‘±‚Ì‹–‰Â
+  //ï¿½Ú‘ï¿½ï¿½Ì‹ï¿½ï¿½ï¿½
   result = listen(s2, 1);
   if (result < 0){
-    printf("Ú‘±‹–‰ÂƒGƒ‰[\n");
+    printf("ï¿½Ú‘ï¿½ï¿½ï¿½ï¿½ÂƒGï¿½ï¿½ï¿½[\n");
   }
 
 
@@ -213,25 +213,25 @@ int main(int argc, char* argv[]){
 
 
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç’ÊM‚ª‚ ‚é‚Ü‚Å‘Ò‹@
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ï¿½ÊMï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚Å‘Ò‹@
   s3 = accept(s2, NULL, NULL);
   if (s3 < 0){
-    printf("‘Ò‹@ƒGƒ‰[\n");
+    printf("ï¿½Ò‹@ï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚Öƒf[ƒ^‚ğ‘—M‚·‚é
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½Öƒfï¿½[ï¿½^ï¿½ğ‘—Mï¿½ï¿½ï¿½ï¿½
   result = send(s3, "player2 name=", 20, 0);
 
-  //ƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç‘—M‚³‚ê‚½ƒf[ƒ^‚ÌóM
+  //ï¿½Nï¿½ï¿½ï¿½Cï¿½Aï¿½ï¿½ï¿½gï¿½ï¿½ï¿½ç‘—ï¿½Mï¿½ï¿½ï¿½ê‚½ï¿½fï¿½[ï¿½^ï¿½Ìï¿½M
   result = recv(s3, name2, 20, 0);
   if (result < 0){
-    printf("óMƒGƒ‰[\n");
+    printf("ï¿½ï¿½Mï¿½Gï¿½ï¿½ï¿½[\n");
   }
 
-  printf("%s‚ğóM‚µ‚Ü‚µ‚½\n", name2);
+  printf("%sï¿½ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½\n", name2);
 
 
-  char buffer[256] = "start";  //óMƒf[ƒ^‚Ìƒoƒbƒtƒ@—Ìˆæ
+  char buffer[256] = "start";  //ï¿½ï¿½Mï¿½fï¿½[ï¿½^ï¿½Ìƒoï¿½bï¿½tï¿½@ï¿½Ìˆï¿½
 
   while(1){
 
@@ -242,17 +242,17 @@ int main(int argc, char* argv[]){
     result = recv(s1, buffer, 10, 0);
 
     if (result < 0){
-      printf("óMƒGƒ‰[\n");
+      printf("ï¿½ï¿½Mï¿½Gï¿½ï¿½ï¿½[\n");
       break;
     }
 
-    printf("%s‚ğóM‚µ‚Ü‚µ‚½(%s)\n", buffer, name1);
+    printf("%sï¿½ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½(%s)\n", buffer, name1);
 
 
     char buffer1[256];
     strcpy(buffer1,buffer);
     if(!displayBoard(buffer1,1)){
-      printf("ƒQ[ƒ€ƒZƒbƒg\n");
+      printf("ï¿½Qï¿½[ï¿½ï¿½ï¿½Zï¿½bï¿½g\n");
       break;
     }
   
@@ -262,17 +262,17 @@ int main(int argc, char* argv[]){
     result = recv(s3, buffer, 10, 0);
 
     if (result < 0){
-      printf("óMƒGƒ‰[\n");
+      printf("ï¿½ï¿½Mï¿½Gï¿½ï¿½ï¿½[\n");
       break;
     }
 
-    printf("%s‚ğóM‚µ‚Ü‚µ‚½(%s)\n", buffer, name2);
+    printf("%sï¿½ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Ü‚ï¿½ï¿½ï¿½(%s)\n", buffer, name2);
 
     char buffer2[256];
     strcpy(buffer2,buffer);
 
     if(!displayBoard(buffer2,2)){
-      printf("ƒQ[ƒ€ƒZƒbƒg\n");
+      printf("ï¿½Qï¿½[ï¿½ï¿½ï¿½Zï¿½bï¿½g\n");
       break;
     }
 
@@ -283,12 +283,12 @@ int main(int argc, char* argv[]){
   result = send(s1, "end", 10, 0);
   result = send(s3, "end", 10, 0);
 
-  printf("Ú‘±I—¹\n");
+  printf("ï¿½Ú‘ï¿½ï¿½Iï¿½ï¿½\n");
   closesocket(s1);
   closesocket(s3);
 
 
-  //ƒ\ƒPƒbƒg’ÊM‚ÌI—¹
+  //ï¿½\ï¿½Pï¿½bï¿½gï¿½ÊMï¿½ÌIï¿½ï¿½
   WSACleanup();
 
   printf("END\n");
