@@ -1,31 +1,86 @@
 //http://blog.livedoor.jp/akf0/archives/51585502.html
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <time.h>
-#include <winsock2.h>
+#include "parameter.h"
+#include "move.h"
+#include "forbiddenMove.h"
+
+#define END      100
+#define CONTINUE 110
+
+extern int board[BOARD_MAX][BOARD_MAX];
+extern int tempBoard[BOARD_MAX][BOARD_MAX];
 
 int init(char *a[],SOCKET *s);
+void display();
 
 int main(int argc, char *argv[]) {
 
-    SOCKET s;
+    // SOCKET s;
 
-    init(argv,&s);	
+    // //init(argv,&s);	
 
-	char buffer[1024];
-	//サーバからデータを受信(名前入力を促される)
-	recv(s, buffer, 1024, 0);
-	printf("→ %s\n\n", buffer);
+	// char buffer[1024];
+	// //サーバからデータを受信(名前入力を促される)
+	// recv(s, buffer, 1024, 0);
+	// printf("→ %s\n\n", buffer);
 
-	//名前入力
-	char input[256];
-	scanf("%s",input);	
-	send(s, input, strlen(input), 0);
+	// //名前入力
+	// char input[256];
+	// scanf("%s",input);	
+	// send(s, input, strlen(input), 0);
 
-	// Windows でのソケットの終了
-	closesocket(s);
-	WSACleanup();
+	// // Windows でのソケットの終了
+	// closesocket(s);
+	// WSACleanup();
+
+	//配列初期化
+	int i,j;
+	for(i = 0; i < BOARD_MAX; i++){
+		for(j = 0; j < BOARD_MAX; j++){
+			board[i][j]     = 0;
+			tempBoard[i][j] = 0;
+			
+		}
+	}
+
+	unsigned int a = 0x0011;
+	a = a << 2;
+	a = a + 0x0001;
+	a = a + 0x0400;
+	printf("%04x\n",a);
+
+	int b[BOARD_MAX][BOARD_MAX] = 
+		{
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,0,2,0,0,0,1,0,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,2,0,2,0,0,0,0,0},
+			{0,0,0,0,0,0,0,2,1,0,0,0,0,0,0},
+			{0,0,0,0,2,1,2,2,0,0,2,2,0,0,0},
+			{0,0,0,0,0,0,2,2,2,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,0,0,2,0,0,0,0,0},
+			{0,0,0,0,0,0,0,2,0,0,2,0,0,0,0},
+			{0,0,0,0,0,0,0,1,0,0,0,2,0,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,1,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+			{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+		}; 
+
+	
+	for(i = 0; i < BOARD_MAX; i++){
+		for(j = 0; j < BOARD_MAX; j++){
+			board[i][j]     = b[i][j];
+			tempBoard[i][j] = b[i][j];
+			
+		}
+	}
+
+	display();
+
+	int s;
+	s = evaluation(7, 7, AI);
+
 	return 0;
 
 }
@@ -59,3 +114,23 @@ int init(char *a[], SOCKET *s)
 	
 }
 
+/* ====================================================================== */
+/**
+ * @brief  盤面を表示
+ */
+/* ====================================================================== */
+void display()
+{
+	int i,j = 0;
+	for(i = 0; i < BOARD_MAX; i++)
+	{
+		for(j = 0; j<BOARD_MAX; j++)
+		{
+			if(board[i][j] == 0) printf("- ",board[i][j]);
+			if(board[i][j] == 1) printf("o ",board[i][j]);
+			if(board[i][j] == 2) printf("x ",board[i][j]);
+		}
+		printf("\n");	
+	}
+	printf("\n\n");
+}
