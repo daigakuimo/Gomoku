@@ -4,6 +4,7 @@
 
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
+extern int battingFirstPlayer;
 
 /* ====================================================================== */
 /**
@@ -21,9 +22,9 @@ void move(char *input)
 
 
     int y,x;
-    for(y = 0; y < BOARD_MAX; y++)
+    for(y = 5; y < BOARD_MAX-5; y++)
     {
-        for(x = 0; x < BOARD_MAX; x++)
+        for(x = 5; x < BOARD_MAX-5; x++)
         {
             //石が置いてある場所は探索しない
             if(board[y][x] != EMPTY) continue;
@@ -50,6 +51,7 @@ void move(char *input)
 
     //ミニマックス法で選ばれた手を返す
     sprintf(input,"%d,%d", bestX, bestY);
+    printf("%s\n",input);
     
 }
 
@@ -82,6 +84,7 @@ int  minMax(int level, int player, int putX, int putY)
         nextPlayer = AI;
     }
 
+    printf("%d\n",level);
 
     //禁じ手ならこれ以上探索せずに評価値を返す
 
@@ -89,13 +92,15 @@ int  minMax(int level, int player, int putX, int putY)
     //探索する深さの制限に達すると手を評価する
     if(level == 0)
     {
+        printf("%d,%d\n",putX,putY);
+        display(0);
         return evaluation(putX,putY,player);
     }
 
     int y,x;
-    for(y = 0; y < BOARD_MAX; y++)
+    for(y = 5; y < BOARD_MAX-5; y++)
     {
-        for(x = 0; x < BOARD_MAX; x++)
+        for(x = 5; x < BOARD_MAX-5; x++)
         {
             //石が置いてある場所は探索しない
             if(tempBoard[y][x] != EMPTY) continue;
@@ -161,9 +166,10 @@ int evaluation(int putX, int putY, int player)
 
     //初期化
     unsigned int sta[DIRECTION];
-    int row[DIRECTION] = {0};
-    int patern[DIRECTION] = {0};
-    int total[TOTAL_DIRECTION] = {0};
+    int row[DIRECTION]                  = {0};
+    int patern[DIRECTION]               = {0};
+    int total[TOTAL_DIRECTION]          = {0};
+    int directionPoint[TOTAL_DIRECTION] = {0};
 
     int i = 0;
     for(i = 0; i < DIRECTION; i++)
@@ -195,6 +201,18 @@ int evaluation(int putX, int putY, int player)
         printf("total[%d]:%d\n",m,total[m]);
     }
 
+
+    for(m = 0; m < TOTAL_DIRECTION; m++)
+    {
+        directionPoint[m] =getEvaluationPoint(total[m],patern[m],patern[m + 4]);
+        printf("directionPoint[%d]:%d\n",m,directionPoint[m]);
+        if(maxScore <= directionPoint[m])
+        {
+            maxScore = directionPoint[m];
+        }
+    }
+
+    returnScore = maxScore;
 
     return returnScore;
 }
@@ -259,6 +277,11 @@ int countStone(unsigned int sta[], int player, int putX, int putY, int direction
 
     for(k = 0; k < MAX_SEARCH_STONE_NUM; k++)
     {
+        if((putY + directionY * k) < 0 || (putX + directionX * k) < 0 || (putY + directionY * k) >= BOARD_MAX || (putX + directionX * k) >= BOARD_MAX)
+        {
+            break;
+        }
+
         if(tempBoard[putY + directionY * k][putX + directionX * k] == player)
         {
             sta[direction] = sta[direction] << 2;
@@ -371,4 +394,62 @@ int getPatern(unsigned int sta[], int direction)
 
     
     return patern;
+}
+
+
+int getEvaluationPoint(int total,int patern1, int patern2)
+{
+    static int evaluationPoint[4][8][8] = {
+        {
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_THREE,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR_FOUR ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  },
+            {MOVE_JUMP_THREE,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_JUMP_THREE},
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  },
+            {MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_FOUR ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_THREE,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  }
+        },
+        {
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_THREE,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR_THREE,MOVE_FOUR_THREE,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_JUMP_THREE,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR_THREE,MOVE_FOUR_THREE,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_THREE},
+            {MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_THREE,MOVE_FOUR_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR },
+            {MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_THREE,MOVE_FOUR_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_THREE,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  }
+        },
+        {
+            {MOVE_THREE     ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_THREE     },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR ,MOVE_FOUR_FOUR ,MOVE_JUMP_FOUR ,MOVE_JUMP_FOUR },
+            {MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  },
+            {MOVE_THREE     ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_JUMP_FOUR ,MOVE_NO_POINT  ,MOVE_NO_POINT  }
+        },
+        {
+            {MOVE_WIN_FOUR  ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_WIN_FOUR  },
+            {MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      },
+            {MOVE_FOUR      ,MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR      },
+            {MOVE_FOUR      ,MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR      },
+            {MOVE_FOUR      ,MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR      },
+            {MOVE_FOUR      ,MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR      },
+            {MOVE_FOUR      ,MOVE_FOUR      ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_NO_POINT  ,MOVE_FOUR      },
+            {MOVE_WIN_FOUR  ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_WIN_FOUR  }
+        }
+    };
+
+    if(total == 5)
+    {
+        return MOVE_WIN;
+    }
+    else if(battingFirstPlayer == AI && total >= 6)
+    {
+        return MOVE_FORBIDDEN;
+    }
+
+    return evaluationPoint[total-1][patern1][patern2];
 }

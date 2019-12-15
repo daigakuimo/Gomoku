@@ -16,3 +16,6 @@ int board[BOARD_MAX][BOARD_MAX];        // ゲーム用
 int tempBoard[BOARD_MAX][BOARD_MAX];    // 探索用盤面
 
 int battingFirstPlayer;                 // 先攻のプレイヤー
+
+void display(int boardFlag);
+void checkBattingFirst();
