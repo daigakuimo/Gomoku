@@ -17,14 +17,15 @@ extern int battingFirstPlayer;
 void move(char *input)
 {
     int maxScore = INT_MIN;
+    int minScore    = INT_MAX;
     int score;
     int bestX = 0, bestY = 0;
 
 
     int y,x;
-    for(y = 5; y < BOARD_MAX-5; y++)
+    for(y = 5; y < BOARD_MAX-6; y++)
     {
-        for(x = 5; x < BOARD_MAX-5; x++)
+        for(x = 5; x < BOARD_MAX-6; x++)
         {
             //石が置いてある場所は探索しない
             if(board[y][x] != EMPTY) continue;
@@ -33,7 +34,11 @@ void move(char *input)
             tempBoard[y][x] = AI;
 
             //ミニマックス法で評価値を得る
-            score = minMax(SEARCH_DEPTH, AI, x, y);
+            score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
+
+            printf("%d,%d\n", x, y);
+            printf("move-score:%d\n",score);
+            Sleep(1000);
 
             //評価値が一番高い手を選ぶ
             if(score > maxScore)
@@ -41,6 +46,7 @@ void move(char *input)
                 maxScore = score;
                 bestX = x;
                 bestY = y;
+                printf("maxScore:%d\n",maxScore);
             }
 
             //仮で打った石を消す
@@ -67,7 +73,7 @@ void move(char *input)
  * @return  評価値(整数)
  */
 /* ====================================================================== */
-int  minMax(int level, int player, int putX, int putY)
+int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
 {
     int maxScore    = INT_MIN;
     int minScore    = INT_MAX;
@@ -84,23 +90,22 @@ int  minMax(int level, int player, int putX, int putY)
         nextPlayer = AI;
     }
 
-    printf("%d\n",level);
+    //printf("%d\n",level);
+    //printf("beforeBranchScore : %d\n", beforeBranchScore);
 
     //禁じ手ならこれ以上探索せずに評価値を返す
-
 
     //探索する深さの制限に達すると手を評価する
     if(level == 0)
     {
-        printf("%d,%d\n",putX,putY);
-        display(0);
-        return evaluation(putX,putY,player);
+        return evaluation(putX,putY,nextPlayer);
     }
 
+
     int y,x;
-    for(y = 5; y < BOARD_MAX-5; y++)
+    for(y = 5; y < BOARD_MAX-6; y++)
     {
-        for(x = 5; x < BOARD_MAX-5; x++)
+        for(x = 5; x < BOARD_MAX-6; x++)
         {
             //石が置いてある場所は探索しない
             if(tempBoard[y][x] != EMPTY) continue;
@@ -109,22 +114,61 @@ int  minMax(int level, int player, int putX, int putY)
             tempBoard[y][x] = player;
 
             //ミニマックス法で評価値を得る
-            score = minMax(level-1, nextPlayer, x, y);
-
-            if(player == ENEMY)
+            if(nextPlayer == AI)
             {
-                //評価値が一番低い手を選ぶ
-                if(score < minScore)
-                {
-                    minScore = score;
-                }
+                score = minMax(level-1, nextPlayer, x, y, maxScore);
             }
             else
             {
+                score = minMax(level-1, nextPlayer, x, y, minScore);
+            }
+
+            if(level == 1)
+            {
+                tempBoard[y][x] = EMPTY;
+                printf("level-score:%d\n",score);
+                return score;
+            }
+            
+        
+            if(player == AI)
+            {
+                //printf("AI\n");
+                //評価値が一番低い手を選ぶ
+                if(score < minScore)
+                {
+                    printf("AI:%d\n",score);
+                    minScore = score;
+                }
+
+                if(beforeBranchScore > minScore)
+                {
+                    //仮で打った石を消す
+                    printf("αカット\n");
+                    printf("beforeBranchScore : %d > minScore : %d\n", beforeBranchScore, minScore);
+                    tempBoard[y][x] = EMPTY;
+                    break;
+                }
+
+
+            }
+            else
+            {
+                //printf("ENEMY\n");
                 //評価値が一番高い手を選ぶ
                 if(score > maxScore)
                 {
+                    printf("ENEMY:%d\n",score);
                     maxScore = score;
+                }
+
+                if(beforeBranchScore < maxScore)
+                {
+                    //仮で打った石を消す
+                    printf("βカット\n");
+                    printf("beforeBranchScore : %d < maxScore : %d\n", beforeBranchScore, maxScore);
+                    tempBoard[y][x] = EMPTY;
+                    break;
                 }
             }
 
@@ -134,7 +178,7 @@ int  minMax(int level, int player, int putX, int putY)
         }
     }
 
-    if(player == ENEMY)
+    if(player == AI)
     {
         returnScore = minScore;
     }
@@ -142,8 +186,8 @@ int  minMax(int level, int player, int putX, int putY)
     {
         returnScore = maxScore;
     }
-    
 
+    printf("retutnScore:%d\n",returnScore);
     return returnScore;
 }
 
@@ -177,42 +221,46 @@ int evaluation(int putX, int putY, int player)
         sta[i] = 0x0000;
     }
 
-    int directionX = 0;
-    int directionY = 1;
+    printf("%d\n",player);
+    printf("%d,%d\n",putX,putY);
+    display(0);
     
     int direction = 0;
     for(direction = 0; direction < DIRECTION; direction++)
     {
         row[direction] = countStone(sta,player,putX,putY,direction);
-        printf("sta[%d]:%04x\n",direction,sta[direction]);
-        printf("row[%d]:%d\n",direction,row[direction]);
+        //printf("sta[%d]:%04x\n",direction,sta[direction]);
+        //printf("row[%d]:%d\n",direction,row[direction]);
     }
 
     for(direction = 0; direction < DIRECTION; direction++)
     {
         patern[direction] = getPatern(sta,direction);
-        printf("patern[%d]:%d\n",direction,patern[direction]);
+        //printf("patern[%d]:%d\n",direction,patern[direction]);
     }
 
     int m = 0;
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
         total[m] = row[m] + row[m + 4] -1;
-        printf("total[%d]:%d\n",m,total[m]);
+        //printf("total[%d]:%d\n",m,total[m]);
     }
 
 
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
         directionPoint[m] =getEvaluationPoint(total[m],patern[m],patern[m + 4]);
-        printf("directionPoint[%d]:%d\n",m,directionPoint[m]);
-        if(maxScore <= directionPoint[m])
+        //printf("directionPoint[%d]:%d\n",m,directionPoint[m]);
+        if(directionPoint[m] > maxScore)
         {
             maxScore = directionPoint[m];
         }
     }
 
     returnScore = maxScore;
+    printf("directionPoint:%d\n",returnScore);
+
+    tempBoard[putY][putX] = EMPTY;
 
     return returnScore;
 }
@@ -396,7 +444,16 @@ int getPatern(unsigned int sta[], int direction)
     return patern;
 }
 
-
+/* ====================================================================== */
+/**
+ * @brief  打った手がどのような手か判定する
+ *
+ * @param[in] total           黒が連続で置かれている数
+ * @param[in] patern1,patern2 
+ *
+ * @return  パターン
+ */
+/* ====================================================================== */
 int getEvaluationPoint(int total,int patern1, int patern2)
 {
     static int evaluationPoint[4][8][8] = {

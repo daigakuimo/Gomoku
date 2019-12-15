@@ -15,7 +15,7 @@
 #define MOVE_FORBIDDEN           0     //禁じ手
 #define MOVE_NO_POINT            5     //評価無し
 
-#define SEARCH_DEPTH             3     //探索の深さ
+#define SEARCH_DEPTH             2     //探索の深さ
 #define DIRECTION                8     //評価時の検索8方向
 #define TOTAL_DIRECTION          4     //評価時の4方向
 #define MAX_SEARCH_STONE_NUM     6     //評価時の石検索の数
@@ -32,7 +32,7 @@
 #define STATE_V                  8
 
 void move(char *input);
-int  minMax(int level, int player, int putX, int putY);
+int  minMax(int level, int player, int putX, int putY, int beforeBranchScore);
 int  evaluation(int putX, int putY, int player);
 int  countStone(unsigned int sta[], int player, int putX, int putY, int direction);
 int  getPatern(unsigned int sta[], int direction);
