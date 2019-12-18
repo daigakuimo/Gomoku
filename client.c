@@ -3,18 +3,13 @@
 #include "move.h"
 #include "forbiddenMove.h"
 
-#define END      100
-#define CONTINUE 110
-
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
 extern int battingFirstPlayer;
+extern int turnCount;
+extern int winFlag;
 
-void checkBattingFirst();
 int  init(char *a[],SOCKET *s);
-void display();
-void decisionMyPut(char *input);
-int  insertBoard(char *data, int player);
 
 
 int main(int argc, char *argv[]) {	
@@ -58,7 +53,9 @@ int main(int argc, char *argv[]) {
 		send(s, input, strlen(input), 0);
 		
 		insertBoard(input,AI);
-		display();
+		display(1);
+
+		turnCount;
 	}
 
 	while(1)
@@ -71,7 +68,9 @@ int main(int argc, char *argv[]) {
 		printf("→ %s\n\n", buffer);
 		
 		controller = insertBoard(buffer,ENEMY);
-		display();
+		display(1);
+
+		turnCount++;
 
 		if(controller == END){
 			printf("you lose\n");
@@ -79,12 +78,25 @@ int main(int argc, char *argv[]) {
 		}
 		
 		char input[256];
-		decisionMyPut(input);
+		move(input);
 		send(s, input, strlen(input), 0);
 		
-		insertBoard(input,AI);
-		display();
+		char* tempInput;
 
+		tempInput = input;
+
+		printf("%s\n",tempInput);
+
+		insertBoard(input,AI);
+		display(1);
+
+		turnCount++;
+
+		if(winFlag == 1){
+			printf("you win\n");
+			break;
+		}
+		
 	}
 
 	// Windows でのソケットの終了
@@ -92,40 +104,6 @@ int main(int argc, char *argv[]) {
 	WSACleanup();
 	return 0;
 
-}
-
-/* ====================================================================== */
-/**
- * @brief  先攻が自分か敵か決める
- */
-/* ====================================================================== */
-void checkBattingFirst()
-{
-	int errorFlag = 1;
-
-	while(errorFlag == 1)
-	{
-		char checkTurn[256];
-		printf("black or white\n");
-		scanf("%s",checkTurn);
-
-		if(strcmp(checkTurn,"black") == 0)
-		{
-			battingFirstPlayer = AI;
-			errorFlag = 0;
-		}
-		else if(strcmp(checkTurn,"white") == 0)
-		{
-			battingFirstPlayer = ENEMY;
-			errorFlag = 0;
-		}
-
-		if(errorFlag == 1)
-		{
-			printf("one more input\n");
-		}
-	}
-	
 }
 
 /* ====================================================================== */
@@ -164,89 +142,5 @@ int init(char *a[], SOCKET *s)
 
 	printf("%sに接続しました\n", destination);
 	
-}
-
-/* ====================================================================== */
-/**
- * @brief  盤面を表示
- */
-/* ====================================================================== */
-void display()
-{
-	int i,j = 0;
-	for(i = 0; i < BOARD_MAX; i++)
-	{
-		for(j = 0; j<BOARD_MAX; j++)
-		{
-			if(board[i][j] == 0) printf("- ",board[i][j]);
-			if(board[i][j] == 1) printf("o ",board[i][j]);
-			if(board[i][j] == 2) printf("x ",board[i][j]);
-		}
-		printf("\n");	
-	}
-	printf("\n\n");
-}
-
-//自分の手を決める 後で消す
-void decisionMyPut(char *input)
-{
-	int my_x, my_y = 99;
-	int put_x,put_y = 99;
-	while(1)
-	{
-		srand((unsigned int)time(NULL));
-		my_x = rand() % 15 + 1;
-
-		srand((unsigned int)time(NULL) + 1);
-		my_y = rand() % 15 + 1;
-
-		put_x = my_x -1;
-		put_y = my_y -1;
-		if(board[put_y][put_x] == 0){
-			break;
-		}
-	}
-
-	sprintf(input,"%d,%d",my_x,my_y);
-}
-
-/* ====================================================================== */
-/**
- * @brief  打たれた手をboardに格納
- *
- * @param[in] data   打たれた手
- * @param[in] player どちらのプレイヤーが打ったか
- *
- * @return  ゲームの終了判定結果(整数)
- */
-/* ====================================================================== */
-int insertBoard(char *data, int player)
-{
-	int x = 99;
-	int y = 99;
-	char *token;
-
-	//"end"が入力されたら終了
-	if(strcmp(data,"end") == 0){
-		return END;
-	}
-		
-	token = strtok(data,",");	
-	x = atoi(token);
-		
-	while(token != NULL)
-	{
-		token = strtok(NULL,",");	
-		y = atoi(token);
-		break;
-	}
-	
-	if(x != 99)
-	{
-		board[y-1][x-1] = player;
-		tempBoard[y-1][x-1] = player;
-	}
-
-	return CONTINUE;
 }
 

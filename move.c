@@ -5,6 +5,9 @@
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
 extern int battingFirstPlayer;
+extern int turnCount;
+extern int winFlag;
+
 
 /* ====================================================================== */
 /**
@@ -21,42 +24,90 @@ void move(char *input)
     int score;
     int bestX = 0, bestY = 0;
 
-
-    int y,x;
-    for(y = 5; y < BOARD_MAX-6; y++)
+    if(turnCount < 6)
     {
-        for(x = 5; x < BOARD_MAX-6; x++)
+        int y,x;
+        for(y = 6; y < 9; y++)
         {
-            //石が置いてある場所は探索しない
-            if(board[y][x] != EMPTY) continue;
-
-            //仮で石を打つ
-            tempBoard[y][x] = AI;
-
-            //ミニマックス法で評価値を得る
-            score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
-
-            printf("%d,%d\n", x, y);
-            printf("move-score:%d\n",score);
-            Sleep(1000);
-
-            //評価値が一番高い手を選ぶ
-            if(score > maxScore)
+            for(x = 6; x < 9; x++)
             {
-                maxScore = score;
-                bestX = x;
-                bestY = y;
-                printf("maxScore:%d\n",maxScore);
-            }
+                //石が置いてある場所は探索しない
+                if(board[y][x] != EMPTY)
+                {
+                    continue;
+                }
+                //仮で石を打つ
+                tempBoard[y][x] = AI;
 
-            //仮で打った石を消す
-            tempBoard[y][x] = EMPTY;
-            
+                //ミニマックス法で評価値を得る
+                //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
+                score = evaluation(x,y,AI);
+
+                printf("%d,%d\n", x, y);
+                printf("move-score:%d\n",score);
+    
+                //評価値が一番高い手を選ぶ
+                if(score > maxScore)
+                {
+                    maxScore = score;
+                    bestX = x;
+                    bestY = y;
+                    printf("maxScore:%d\n",maxScore);
+                }
+
+                //仮で打った石を消す
+                tempBoard[y][x] = EMPTY;
+                
+            }
+        }
+    }
+    else 
+    {
+        int y,x;
+        for(y = 0; y < BOARD_MAX; y++)
+        {
+            for(x = 0; x < BOARD_MAX; x++)
+            {
+                //石が置いてある場所は探索しない
+                if(board[y][x] != EMPTY) continue;
+
+                //仮で石を打つ
+                tempBoard[y][x] = AI;
+
+                //ミニマックス法で評価値を得る
+                //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
+                score = evaluation(x,y,AI);
+
+                printf("%d,%d\n", x, y);
+                printf("move-score:%d\n",score);
+
+                //評価値が一番高い手を選ぶ
+                if(score > maxScore)
+                {
+                    maxScore = score;
+                    bestX = x;
+                    bestY = y;
+                    printf("maxScore:%d\n",maxScore);
+                }
+
+                //仮で打った石を消す
+                tempBoard[y][x] = EMPTY;
+                
+            }
         }
     }
 
-    //ミニマックス法で選ばれた手を返す
-    sprintf(input,"%d,%d", bestX, bestY);
+
+    if(maxScore == MOVE_WIN || maxScore == MOVE_WIN_FOUR)
+    {
+        sprintf(input,"%d,%d,win", bestX + 1, bestY + 1,"win");
+        winFlag = 1;
+    }
+    else
+    {
+        sprintf(input,"%d,%d", bestX + 1, bestY + 1);
+    }
+    
     printf("%s\n",input);
     
 }
@@ -207,6 +258,9 @@ int evaluation(int putX, int putY, int player)
     int minScore    = INT_MAX;
     int returnScore = 0;
 
+    int fourCount   = 0;
+    int threeCount  = 0;
+
 
     //初期化
     unsigned int sta[DIRECTION];
@@ -220,45 +274,52 @@ int evaluation(int putX, int putY, int player)
     {
         sta[i] = 0x0000;
     }
-
-    printf("%d\n",player);
-    printf("%d,%d\n",putX,putY);
-    display(0);
     
     int direction = 0;
     for(direction = 0; direction < DIRECTION; direction++)
     {
         row[direction] = countStone(sta,player,putX,putY,direction);
-        //printf("sta[%d]:%04x\n",direction,sta[direction]);
-        //printf("row[%d]:%d\n",direction,row[direction]);
     }
 
     for(direction = 0; direction < DIRECTION; direction++)
     {
         patern[direction] = getPatern(sta,direction);
-        //printf("patern[%d]:%d\n",direction,patern[direction]);
     }
 
     int m = 0;
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
         total[m] = row[m] + row[m + 4] -1;
-        //printf("total[%d]:%d\n",m,total[m]);
     }
 
 
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
         directionPoint[m] =getEvaluationPoint(total[m],patern[m],patern[m + 4]);
-        //printf("directionPoint[%d]:%d\n",m,directionPoint[m]);
+        
         if(directionPoint[m] > maxScore)
         {
             maxScore = directionPoint[m];
         }
+
+        if(directionPoint[m] == MOVE_FOUR)
+        {
+            fourCount++;
+        }
+        else if(directionPoint[m] == MOVE_THREE)
+        {
+            threeCount++;
+        }
     }
 
-    returnScore = maxScore;
-    printf("directionPoint:%d\n",returnScore);
+    if(battingFirstPlayer == AI && ((fourCount >= 2 || threeCount >= 2) || (fourCount == 1 && threeCount == 1)))
+    {
+        returnScore = 0;
+    }
+    else
+    {
+        returnScore = maxScore;
+    }
 
     tempBoard[putY][putX] = EMPTY;
 

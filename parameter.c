@@ -21,7 +21,7 @@ void display(int boardFlag)
             {
                 if(j != -1)
                 {
-                    printf("%d ",j%10);
+                    printf("%d ",j%10 + 1);
                 } 
                 else
                 {
@@ -34,7 +34,7 @@ void display(int boardFlag)
             {
                 if(j == -1)
                 {
-                    printf("%d ",i%10);
+                    printf("%d ",i%10 + 1);
                 }
                 else
                 {
@@ -87,3 +87,63 @@ void checkBattingFirst()
 	}
 	
 }
+
+/* ====================================================================== */
+/**
+ * @brief  打たれた手をboardに格納
+ *
+ * @param[in] data   打たれた手
+ * @param[in] player どちらのプレイヤーが打ったか
+ *
+ * @return  ゲームの終了判定結果(整数)
+ */
+/* ====================================================================== */
+int insertBoard(char *data, int player)
+{
+	int x = 99;
+	int y = 99;
+	char *token;
+
+	//"end"が入力されたら終了
+	if(strcmp(data,"end") == 0){
+		return END;
+	}
+		
+	token = strtok(data,",");	
+	x = atoi(token);
+		
+	while(token != NULL)
+	{
+		token = strtok(NULL,",");	
+		y = atoi(token);
+		break;
+	}
+	
+	if(x != 99)
+	{
+		board[y-1][x-1] = player;
+		tempBoard[y-1][x-1] = player;
+	}
+
+	return CONTINUE;
+}
+
+int  judgeFinish(char *data)
+{
+	char *token;
+		
+	token = strtok(data,",");	
+		
+	while(token != NULL)
+	{
+		token = strtok(NULL,",");	
+        printf("%s\n",token);
+		if(strcmp(token,"win") == 0)
+        {
+            return END;
+        }
+	}
+	
+	return CONTINUE;
+}
+
