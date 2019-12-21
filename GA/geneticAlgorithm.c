@@ -22,7 +22,7 @@ int main()
     // 評価
     geneticEvaluation(fitness);
 
-    int i;
+    int i,j;
     for(i = 0; i < GENETIC_NUM; i++)
     {
         if(maxFitness < fitness[i])
@@ -31,66 +31,108 @@ int main()
             currentWinGenetic = i;
         }
 
-        if(beforeWinGenetic != currentWinGenetic)
-        {
-            beforeWinGenetic = currentWinGenetic; 
-            consecutiveWin   = 0;
-        }
-
-        consecutiveWin++;
-
         printf("%d : %d\n", i, fitness[i]);
     }
 
-    printf("currentWinGenetic : %d\n", currentWinGenetic);
-
-    geneticSelect(fitness,remainGenetic);
-
-
-    printf("select\n");
-    for(i = 0; i < REMAIN_GENETIC_NUM; i++)
+    if(beforeWinGenetic == currentWinGenetic)
     {
-        printf("%d : %d\n", i, remainGenetic[i]);
+        consecutiveWin++;
+    }
+    else
+    {
+        consecutiveWin = 0;
     }
 
+    beforeWinGenetic = currentWinGenetic;
+
+    printf("currentWinGenetic : %d\n", currentWinGenetic);
+
+
     // // 終了条件を満たすまで繰り返す
-    // while(consecutiveWin <= TERMINATION)
-    // {
-    //     // 選択(バイナリートーナメント)
-    //     geneticSelect(fitness,remainGenetic);
+    int turn = 0;
+    while(consecutiveWin <= TERMINATION)
+    {
+
+        // 選択(バイナリートーナメント)
+        geneticSelect(fitness,remainGenetic);
+
+        printf("select\n");
+        for(i = 0; i < REMAIN_GENETIC_NUM; i++)
+        {
+            printf("%d : %d\n", i, remainGenetic[i]);
+        }
+
+        printf("\n");
+
         
-    //     // 交配 
-    //     crossover(remainGenetic);
+        // 交配 
+        crossover(remainGenetic);
 
-    //     // 突然変異
-    //     mutation();
+        // 突然変異
+        mutation();
+        
 
-    //     // 評価
-    //     // geneticEvaluation(fitness);
+        for(i = 0; i < GENETIC_NUM; i++)
+        {
+            fitness[i] = 0;
+        }
+        
+        for(i = 0; i < REMAIN_GENETIC_NUM; i++)
+        {
+            remainGenetic[i] = 0;
+        }
 
-    //     // 勝ち数カウント
-    //     int i;
-            // for(i = 0; i < GENETIC_NUM; i++)
-            // {
-            //     if(maxFitness < fitness[i])
-            //     {
-            //         maxFitness        = fitness[i];
-            //         currentWinGenetic = i;
-            //     }
+        for(i = 0; i < GENETIC_NUM; i++)
+        {
+            for(j = 0; j < EVALUATION_PATERN_NUM; j++)
+            {
+                printf("%d,",evaluationPaternGenetic[i][j]);
+            }
+            printf("\n");
+        }
 
-            //     if(beforeWinGenetic != currentWinGenetic)
-            //     {
-            //         beforeWinGenetic = currentWinGenetic; 
-            //         consecutiveWin   = 0;
-            //     }
+        // 評価
+        geneticEvaluation(fitness);
 
-            //     consecutiveWin++;
+        // 勝ち数カウント
+        int i;
+        maxFitness = 0;
+        for(i = 0; i < GENETIC_NUM; i++)
+        {
+            if(maxFitness < fitness[i])
+            {
+                maxFitness        = fitness[i];
+                currentWinGenetic = i;
+            }
 
-            //     printf("%d : %d\n", i, fitness[i]);
-            // }
+            printf("%d : %d\n", i, fitness[i]);
+        }
 
+        if(beforeWinGenetic == currentWinGenetic)
+        {
+            consecutiveWin++;
+        }
+        else
+        {
+            consecutiveWin = 0;
+        }
 
-    // }
+        beforeWinGenetic = currentWinGenetic;
+
+        printf("before:%d\n",beforeWinGenetic);
+        printf("current:%d\n",currentWinGenetic);
+        printf("win num:%d\n",consecutiveWin);
+
+    }
+
+    for(i = 0; i < GENETIC_NUM; i++)
+    {
+        for(j = 0; j < EVALUATION_PATERN_NUM; j++)
+        {
+            printf("%d,",evaluationPaternGenetic[i][j]);
+        }
+        printf("\n");
+    }
 
     
 

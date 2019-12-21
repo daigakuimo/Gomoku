@@ -30,18 +30,26 @@ void init()
         {16 ,20 ,26 ,36 ,49 ,65 ,85 ,8  ,34,63,96,32,71,14,59,8,61},
         {49 ,52 ,59 ,69 ,82 ,98 ,18 ,40 ,67,96,29,65,4,46,92,41,93},
         {82 ,85 ,91 ,1  ,14 ,31 ,50 ,73 ,99,29,61,97,36,79,25,74,26},
-        {21 ,24 ,31 ,40 ,54 ,70 ,89 ,12 ,38,68,100,36,76,18,64,13,65},
+        {21 ,24 ,31 ,40 ,54 ,70 ,89 ,12 ,38,68,19,36,76,18,64,13,65},
         {63 ,67 ,73 ,83 ,96 ,12 ,32 ,55 ,81,10,43,79,18,61,6,55,7},
-        {32 ,35 ,42 ,52 ,65 ,81 ,100,23 ,49,79,12,47,87,29,75,24,76},
+        {32 ,35 ,42 ,52 ,65 ,81 ,16 ,23 ,49,79,12,47,87,29,75,24,76},
         {33 ,36 ,43 ,53 ,66 ,82 ,2  ,25 ,51,80,13,49,88,30,76,25,77},
     };
 
     int i,j;
+    int count = 0;
     for(i = 0; i < GENETIC_NUM; i++)
     {
         for(j = 0; j < EVALUATION_PATERN_NUM; j++)
         {
-            evaluationPaternGenetic[i][j] = tempGenetic[i][j];
+            if(i == 0)
+            {
+                evaluationPaternGenetic[i][j] = tempGenetic[i][j];
+                continue;
+            }
+            srand((unsigned int)time(NULL) + count); 
+            evaluationPaternGenetic[i][j] = rand() % 99 + 1;
+            count++;
         }
     }
 
@@ -72,10 +80,10 @@ void geneticEvaluation(int fitness[])
 
             int winner;
 
-            printf("%d vs %d\n",s,k);
+            //printf("%d vs %d\n",s,k);
             winner = battle(s,k);
 
-            printf("\n\n");
+            //printf("\n\n");
 
             if(winner == s)
             {
@@ -108,9 +116,11 @@ void geneticSelect(int fitness[], int remainGenetic[])
     int alreadyUseNum[GENETIC_NUM]  = {1,0,0,0,0,0,0,0,0,0,0}; 
     int i;
     int r , n;
-    for(i = 0; i < REMAIN_GENETIC_NUM; i++)
+    for(i = 0; i < REMAIN_GENETIC_NUM - 1; i++)
     {
         int count = 0;
+
+        // ランダムでバイナリートーナメントを行う
         while(1)
         {
             srand((unsigned int)time(NULL) + count); 
@@ -138,7 +148,6 @@ void geneticSelect(int fitness[], int remainGenetic[])
             count++;
         }
 
-        printf("%d:%d vs %d:%d\n",r,fitness[r],n,fitness[n]);
         if(fitness[r] > fitness[n])
         {
             remainGenetic[i] = r;
@@ -160,7 +169,100 @@ void geneticSelect(int fitness[], int remainGenetic[])
 /* ====================================================================== */
 void crossover(int remainGenetic[])
 {
+    int loserGenetic[GENETIC_NUM - REMAIN_GENETIC_NUM] = {0};
 
+    int i,j;
+    int index = 0; 
+    int flag  = 1;
+
+    for(i = 0; i < GENETIC_NUM; i++)
+    {
+        flag = 1;
+        for(j = 0; j < REMAIN_GENETIC_NUM; j++)
+        {
+            if(remainGenetic[j] == i){
+                flag = 0;
+                break;
+            }
+        }
+
+        if(flag)
+        {
+            loserGenetic[index] = i;
+            index++;
+        }
+    }
+
+    int remainIndex = 0;
+    srand((unsigned int)time(NULL));
+    int t = rand() % 3;
+    for(i = 0; i < GENETIC_NUM - REMAIN_GENETIC_NUM; i++)
+    {
+        if(i < 3)
+        {
+            if(i == t)
+            {
+                for(j = 0; j < EVALUATION_PATERN_NUM; j++)
+                {
+                    if(j < 4 || j > 12)
+                    {
+                        evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[remainIndex + 1]][j];
+                    }
+                    else
+                    {
+                        evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[remainIndex]][j];
+                    }
+                }
+            }
+            else
+            {
+                for(j = 0; j < EVALUATION_PATERN_NUM; j++)
+                {
+                    if(j < 4 || j > 12)
+                    {
+                        evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[remainIndex]][j];
+                    }
+                    else
+                    {
+                        evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[remainIndex + 1]][j];
+                    }
+                }
+            }
+            
+            remainIndex += 2;
+        }
+        else
+        {
+            int r,n;
+            srand((unsigned int)time(NULL)); 
+            r = rand() % 5; 
+
+            n = r;
+
+            int turn = 0;
+            while(r == n)
+            {
+                srand((unsigned int)time(NULL) + turn); 
+                n = rand() % 5;
+                turn++;
+            }
+
+            
+            
+            for(j = 0; j < EVALUATION_PATERN_NUM; j++)
+            {
+                if(j < 4 || j > 12)
+                {
+                    evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[r]][j];
+                }
+                else
+                {
+                    evaluationPaternGenetic[loserGenetic[i]][j] = evaluationPaternGenetic[remainGenetic[n]][j];
+                }
+            }
+        }
+
+    }
 
 }
 
@@ -172,7 +274,20 @@ void crossover(int remainGenetic[])
 /* ====================================================================== */
 void mutation()
 {
+    int mutationGenetic;
+    int mutationIndex;
+    int mutationValue;
 
+    srand((unsigned int)time(NULL)); 
+    mutationGenetic = rand() % (GENETIC_NUM - 1) + 1;
+
+    srand((unsigned int)time(NULL) + 1); 
+    mutationIndex = rand() % EVALUATION_PATERN_NUM;
+
+    srand((unsigned int)time(NULL) + 2); 
+    mutationValue = rand() % 99 + 1;
+
+    evaluationPaternGenetic[mutationGenetic][mutationIndex] = mutationValue;
 
 }
 
@@ -220,8 +335,8 @@ int  battle(int s, int k)
 
         if(winFlag)
 		{
-            printf("%d vs %d\n",s,k);
-			printf("genetic:%d win\n",s);
+            // printf("%d vs %d\n",s,k);
+			// printf("genetic:%d win\n",s);
             winner = s;
 			break;
 		}
@@ -230,9 +345,9 @@ int  battle(int s, int k)
 
 		if(controller == ENEMY_FORBIDDEN)
 		{
-            printf("%d vs %d\n",s,k);
-            printf("genetic:%d forbidden\n",s);
-			printf("genetic:%d win\n",k);
+            // printf("%d vs %d\n",s,k);
+            // printf("genetic:%d forbidden\n",s);
+			// printf("genetic:%d win\n",k);
             winner = k;
 			break;
 		}
@@ -250,8 +365,8 @@ int  battle(int s, int k)
 
         if(winFlag)
 		{
-            printf("%d vs %d\n",s,k);
-			printf("genetic:%d win\n",k);
+            // printf("%d vs %d\n",s,k);
+			// printf("genetic:%d win\n",k);
             winner = k;
 			break;
 		}
@@ -260,8 +375,8 @@ int  battle(int s, int k)
 
         if(controller == ENEMY_FORBIDDEN)
 		{
-            printf("genetic:%d forbidden\n",k);
-			printf("genetic:%d win\n",s);
+            // printf("genetic:%d forbidden\n",k);
+			// printf("genetic:%d win\n",s);
             winner = s;
 			break;
 		}
