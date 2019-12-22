@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "*.php": "php",
-        "forbiddenmove.h": "c"
+        "forbiddenmove.h": "c",
+        "parameter.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

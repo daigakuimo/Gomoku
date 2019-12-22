@@ -7,13 +7,14 @@
 #include <winsock2.h>
 #include <limits.h>
 
-#define BOARD_MAX 15                    // 盤の目の数
-#define EMPTY     0                     // 空
-#define ENEMY     1                     // 敵の石
-#define AI        2                     // 自分の石
+#define BOARD_MAX       15              // 盤の目の数
+#define EMPTY           0               // 空
+#define ENEMY           1               // 敵の石
+#define AI              2               // 自分の石
 
-#define END      100
-#define CONTINUE 110
+#define END             100
+#define CONTINUE        110
+#define ENEMY_FORBIDDEN 120
 
 int board[BOARD_MAX][BOARD_MAX];        // ゲーム用
 int tempBoard[BOARD_MAX][BOARD_MAX];    // 探索用盤面

@@ -1,4 +1,6 @@
 #include "parameter.h"
+#include "move.h"
+#include "forbiddenMove.h"
 
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
@@ -21,7 +23,9 @@ void display(int boardFlag)
             {
                 if(j != -1)
                 {
-                    printf("%d ",j%10 + 1);
+					int h = j%10 + 1;
+					if(h == 10) h = 0;
+                    printf("%d ",h);
                 } 
                 else
                 {
@@ -34,7 +38,9 @@ void display(int boardFlag)
             {
                 if(j == -1)
                 {
-                    printf("%d ",i%10 + 1);
+                    int h = i%10 + 1;
+					if(h == 10) h = 0;
+                    printf("%d ",h);
                 }
                 else
                 {
@@ -124,6 +130,15 @@ int insertBoard(char *data, int player)
 		board[y-1][x-1] = player;
 		tempBoard[y-1][x-1] = player;
 	}
+
+	if(battingFirstPlayer == player)
+	{
+		if(evaluation(x-1,y-1,player) == MOVE_FORBIDDEN)
+		{
+			return ENEMY_FORBIDDEN;
+		}
+	}
+	
 
 	return CONTINUE;
 }

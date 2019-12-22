@@ -70,29 +70,30 @@ int main(int argc, char *argv[]) {
 		controller = insertBoard(buffer,ENEMY);
 		display(1);
 
-		turnCount++;
-
-		if(controller == END){
+		if(controller == END)
+		{
 			printf("you lose\n");
 			break;
 		}
+		else if(controller == ENEMY_FORBIDDEN)
+		{
+			char sendChar[] = "forbidden";
+			send(s,sendChar,strlen(sendChar),0);
+		}
+
+		turnCount++;
 		
 		char input[256];
-		move(input);
+		move(input,AI);
 		send(s, input, strlen(input), 0);
-		
-		char* tempInput;
-
-		tempInput = input;
-
-		printf("%s\n",tempInput);
 
 		insertBoard(input,AI);
 		display(1);
 
 		turnCount++;
 
-		if(winFlag == 1){
+		if(winFlag)
+		{
 			printf("you win\n");
 			break;
 		}

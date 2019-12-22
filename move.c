@@ -1,101 +1,83 @@
 ﻿#include "move.h"
 #include "forbiddenMove.h"
 #include "parameter.h"
+#include "GA/parameterGA.h"
 
 extern int board[BOARD_MAX][BOARD_MAX];
 extern int tempBoard[BOARD_MAX][BOARD_MAX];
 extern int battingFirstPlayer;
 extern int turnCount;
 extern int winFlag;
-
+extern int GAflag;
+extern int genetic;
 
 /* ====================================================================== */
 /**
- * @brief  ミニマックス法で打つ手を決める
+ * @brief  ミニマックス法で打つ手を決める(2019/12/19 次の手の評価のみ)
  * 
  * @param[in,out] input 打つ手を返す
  * 
  */
 /* ====================================================================== */
-void move(char *input)
+void move(char *input, int player)
 {
-    int maxScore = INT_MIN;
-    int minScore    = INT_MAX;
+    int maxScore     = INT_MIN;
+    int minScore     = INT_MAX;
     int score;
     int bestX = 0, bestY = 0;
+    int searchStartX  = 0;
+    int searchStartY  = 0;
+    int searchFinishX = BOARD_MAX;
+    int searchFinishY = BOARD_MAX;
 
-    if(turnCount < 6)
+    if(turnCount < 3)
     {
-        int y,x;
-        for(y = 6; y < 9; y++)
+        searchStartX  = 6;
+        searchStartY  = 6;
+        searchFinishX = 9;
+        searchFinishY = 9;
+    }
+    else if(turnCount < 6)
+    {
+        searchStartX  = 5;
+        searchStartY  = 5;
+        searchFinishX = 10;
+        searchFinishY = 10;
+    }
+
+    int y,x;
+    for(y = searchStartY; y < searchFinishY; y++)
+    {
+        for(x = searchStartX; x < searchFinishX; x++)
         {
-            for(x = 6; x < 9; x++)
+            //石が置いてある場所は探索しない
+            if(board[y][x] != EMPTY) continue;
+
+            //仮で石を打つ
+            tempBoard[y][x] = player;
+
+            //ミニマックス法で評価値を得る
+            //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
+            score = evaluation(x,y,player);
+
+            // printf("%d,%d\n", x, y);
+            // printf("move-score:%d\n",score);
+
+            //評価値が一番高い手を選ぶ
+            if(score > maxScore)
             {
-                //石が置いてある場所は探索しない
-                if(board[y][x] != EMPTY)
-                {
-                    continue;
-                }
-                //仮で石を打つ
-                tempBoard[y][x] = AI;
+                maxScore = score;
+                bestX = x;
+                bestY = y;
+                //printf("maxScore:%d\n",maxScore);
+            }
 
-                //ミニマックス法で評価値を得る
-                //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
-                score = evaluation(x,y,AI);
-
-                printf("%d,%d\n", x, y);
-                printf("move-score:%d\n",score);
+            //仮で打った石を消す
+            tempBoard[y][x] = EMPTY;
+            
+        }
+    }
     
-                //評価値が一番高い手を選ぶ
-                if(score > maxScore)
-                {
-                    maxScore = score;
-                    bestX = x;
-                    bestY = y;
-                    printf("maxScore:%d\n",maxScore);
-                }
-
-                //仮で打った石を消す
-                tempBoard[y][x] = EMPTY;
-                
-            }
-        }
-    }
-    else 
-    {
-        int y,x;
-        for(y = 0; y < BOARD_MAX; y++)
-        {
-            for(x = 0; x < BOARD_MAX; x++)
-            {
-                //石が置いてある場所は探索しない
-                if(board[y][x] != EMPTY) continue;
-
-                //仮で石を打つ
-                tempBoard[y][x] = AI;
-
-                //ミニマックス法で評価値を得る
-                //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
-                score = evaluation(x,y,AI);
-
-                printf("%d,%d\n", x, y);
-                printf("move-score:%d\n",score);
-
-                //評価値が一番高い手を選ぶ
-                if(score > maxScore)
-                {
-                    maxScore = score;
-                    bestX = x;
-                    bestY = y;
-                    printf("maxScore:%d\n",maxScore);
-                }
-
-                //仮で打った石を消す
-                tempBoard[y][x] = EMPTY;
-                
-            }
-        }
-    }
 
 
     if(maxScore == MOVE_WIN || maxScore == MOVE_WIN_FOUR)
@@ -108,8 +90,8 @@ void move(char *input)
         sprintf(input,"%d,%d", bestX + 1, bestY + 1);
     }
     
-    printf("%s\n",input);
-    
+    //printf("%s\n",input);
+
 }
 
 
@@ -262,6 +244,7 @@ int evaluation(int putX, int putY, int player)
     int threeCount  = 0;
 
 
+    // ここから自分の攻めを評価
     //初期化
     unsigned int sta[DIRECTION];
     int row[DIRECTION]                  = {0};
@@ -295,7 +278,7 @@ int evaluation(int putX, int putY, int player)
 
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
-        directionPoint[m] =getEvaluationPoint(total[m],patern[m],patern[m + 4]);
+        directionPoint[m] =getEvaluationPoint(player,total[m],patern[m],patern[m + 4]);
         
         if(directionPoint[m] > maxScore)
         {
@@ -312,9 +295,32 @@ int evaluation(int putX, int putY, int player)
         }
     }
 
-    if(battingFirstPlayer == AI && ((fourCount >= 2 || threeCount >= 2) || (fourCount == 1 && threeCount == 1)))
+    // ここから相手の手を防ぐか評価
+    //初期化
+    unsigned int preventPatern[DIRECTION]      = {0};
+    int directionPreventPoint[TOTAL_DIRECTION] = {0};
+
+
+    for(direction = 0; direction < DIRECTION; direction++)
     {
-        returnScore = 0;
+        preventPatern[direction] = getPreventPatern(player,putX,putY,direction);
+    }
+
+    for(m = 0; m < TOTAL_DIRECTION; m++)
+    {
+        directionPreventPoint[m] = getPreventEvaluationPoint(preventPatern[m],preventPatern[m + 4]);
+
+        if(directionPreventPoint[m] > maxScore)
+        {
+            maxScore = directionPreventPoint[m];
+        }
+    }
+    
+
+    // 禁じ手か判断
+    if(battingFirstPlayer == player && (fourCount >= 2 || threeCount >= 2))
+    {
+        returnScore = MOVE_FORBIDDEN;
     }
     else
     {
@@ -388,6 +394,7 @@ int countStone(unsigned int sta[], int player, int putX, int putY, int direction
     {
         if((putY + directionY * k) < 0 || (putX + directionX * k) < 0 || (putY + directionY * k) >= BOARD_MAX || (putX + directionX * k) >= BOARD_MAX)
         {
+            sta[direction] = sta[direction] + 0x0400;
             break;
         }
 
@@ -515,7 +522,7 @@ int getPatern(unsigned int sta[], int direction)
  * @return  パターン
  */
 /* ====================================================================== */
-int getEvaluationPoint(int total,int patern1, int patern2)
+int getEvaluationPoint(int player, int total,int patern1, int patern2)
 {
     static int evaluationPoint[4][8][8] = {
         {
@@ -559,15 +566,221 @@ int getEvaluationPoint(int total,int patern1, int patern2)
             {MOVE_WIN_FOUR  ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_FOUR      ,MOVE_WIN_FOUR  }
         }
     };
+    int evaluationPointGA[4][8][8] = {
+        {
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][4]},
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  }
+        },
+        {
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][4]},
+            {evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] },
+            {evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][6],evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][4],evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  }
+        },
+        {
+            {evaluationPaternGenetic[genetic][2]     ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][2]     },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][5] ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][3] },
+            {evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  },
+            {evaluationPaternGenetic[genetic][2]     ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][3] ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  }
+        },
+        {
+            {evaluationPaternGenetic[genetic][0]  ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][0]  },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][8]  ,evaluationPaternGenetic[genetic][1]      },
+            {evaluationPaternGenetic[genetic][0]  ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][1]      ,evaluationPaternGenetic[genetic][0]  }
+        }
+    };
+    
 
     if(total == 5)
     {
         return MOVE_WIN;
     }
-    else if(battingFirstPlayer == AI && total >= 6)
+    else if(battingFirstPlayer == player && total >= 6)
     {
         return MOVE_FORBIDDEN;
     }
 
+    if(GAflag)
+    {
+        return evaluationPointGA[total-1][patern1][patern2];
+    }
+
     return evaluationPoint[total-1][patern1][patern2];
+}
+
+
+int  getPreventPatern(int player, int putX, int putY, int direction)
+{
+    unsigned int preventState = 0x0000;
+    int k = 0;
+    int enemy = 0;
+    int directionX = 0;
+    int directionY = 0;
+
+    switch(direction)
+    {
+        case 0:
+            directionX = 0;
+            directionY = -1;
+            break;
+        
+        case 1:
+            directionX = 1;
+            directionY = -1;
+            break;
+        case 2:
+            directionX = 1;
+            directionY = 0;
+            break;
+        case 3:
+            directionX = 1;
+            directionY = 1;
+            break;
+        case 4:
+            directionX = 0;
+            directionY = 1;
+            break;
+        case 5:
+            directionX = -1;
+            directionY = 1;
+            break;
+        case 6:
+            directionX = -1;
+            directionY = 0;
+            break;
+        case 7:
+            directionX = -1;
+            directionY = -1;
+            break;
+    }
+
+    for(k = 1; k < MAX_SEARCH_STONE_NUM; k++)
+    {
+        if((putY + directionY * k) < 0 || (putX + directionX * k) < 0 || (putY + directionY * k) >= BOARD_MAX || (putX + directionX * k) >= BOARD_MAX)
+        {
+            break;
+        }
+
+        if(tempBoard[putY + directionY * k][putX + directionX * k] == player)
+        {
+            preventState = preventState + 0x4000;
+            break;
+        }
+        else if(tempBoard[putY + directionY * k][putX + directionX * k] == EMPTY)
+        {
+            break;
+        }
+        else
+        {
+            preventState = preventState << 2;
+            preventState = preventState + 0x0001;
+        }
+    }
+
+    if(preventState == 0x4000)
+    {
+        preventState = 0x0000;
+    }
+
+    int patern = 10;
+
+    switch(preventState)
+    {
+        case 0x0000:
+            patern = STATE_A;
+            break;
+
+        case 0x0001:
+            patern = STATE_X;
+            break;
+        
+        case 0x4001:
+            patern = STATE_B;
+            break;
+        
+        case 0x0005:
+            patern = STATE_C;
+            break;
+
+        case 0x4005:
+            patern = STATE_D;
+            break;
+        
+        case 0x0015:
+            patern = STATE_E;
+            break;
+
+        case 0x4015:
+            patern = STATE_F;
+            break;
+        
+        case 0x0055:
+            patern = STATE_O;
+            break;
+        
+        case 0x4055:
+            patern = STATE_V;
+            break;
+        
+        default:
+            patern = 0;
+
+    }
+
+    return patern;
+}
+
+int  getPreventEvaluationPoint(int patern1, int patern2)
+{
+    
+    static int preventEvaluationPoint[9][9] = {
+        {MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,PREVENT_TWO      ,PREVENT_B_TWO    ,PREVENT_THREE    ,PREVENT_B_THREE  ,MOVE_NO_POINT    ,PREVENT_WIN  },
+        {MOVE_NO_POINT    ,PREVENT_J_TWO    ,PREVENT_B_J_TWO  ,PREVENT_J_THREE  ,PREVENT_B_J_THREE,PREVENT_WIN      ,PREVENT_WIN      ,MOVE_NO_POINT    ,PREVENT_WIN  },
+        {MOVE_NO_POINT    ,PREVENT_B_J_TWO  ,MOVE_NO_POINT    ,PREVENT_B_J_THREE,MOVE_NO_POINT    ,PREVENT_WIN      ,PREVENT_WIN      ,MOVE_NO_POINT    ,PREVENT_WIN  },
+        {PREVENT_TWO      ,PREVENT_J_THREE  ,PREVENT_B_J_THREE,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {PREVENT_B_TWO    ,PREVENT_B_J_THREE,MOVE_NO_POINT    ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {PREVENT_THREE    ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {PREVENT_B_THREE  ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT    ,MOVE_NO_POINT},
+        {PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+    };
+
+    int preventEvaluationPointGA[9][9] = {
+        {evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][13]      ,evaluationPaternGenetic[genetic][15]    ,evaluationPaternGenetic[genetic][9]    ,evaluationPaternGenetic[genetic][11]  ,evaluationPaternGenetic[genetic][8]    ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][14]    ,evaluationPaternGenetic[genetic][15]  ,evaluationPaternGenetic[genetic][10]  ,evaluationPaternGenetic[genetic][12],PREVENT_WIN      ,PREVENT_WIN      ,evaluationPaternGenetic[genetic][8]    ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][15]  ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][12],evaluationPaternGenetic[genetic][8]    ,PREVENT_WIN      ,PREVENT_WIN      ,evaluationPaternGenetic[genetic][8]    ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][13]      ,evaluationPaternGenetic[genetic][10]  ,evaluationPaternGenetic[genetic][12],PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][15]    ,evaluationPaternGenetic[genetic][12],evaluationPaternGenetic[genetic][8]    ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][9]    ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][11]  ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+        {evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]    ,evaluationPaternGenetic[genetic][8]},
+        {PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN      ,PREVENT_WIN  },
+    };
+ 
+    if(GAflag)
+    {
+        return preventEvaluationPointGA[patern1][patern2];
+    }
+    
+    
+    return preventEvaluationPoint[patern1][patern2];
 }

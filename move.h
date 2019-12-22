@@ -1,19 +1,28 @@
 #pragma once
 
 //評価値
-#define MOVE_WIN                 100   //勝ち確
-#define MOVE_PREVENT_ENEMY_WIN   80    //相手の勝ちを防ぐ
-#define MOVE_PREVENT_ENEMY_THREE 55    //相手の三を防ぐ
-#define MOVE_WIN_FOUR            90    //勝利四   
-#define MOVE_FOUR                50    //四
-#define MOVE_THREE               40    //三
-#define MOVE_JUMP_FOUR           53    //飛び四
-#define MOVE_JUMP_THREE          39    //飛び三
-#define MOVE_FOUR_FOUR           75    //四四
-#define MOVE_FOUR_THREE          70    //四三
-#define MOVE_THREE_THREE         65    //三三
-#define MOVE_FORBIDDEN           0     //禁じ手
-#define MOVE_NO_POINT            5     //評価無し
+#define MOVE_WIN                100    //勝ち確
+#define MOVE_WIN_FOUR           90     //勝利四   0  
+#define MOVE_FOUR               50     //四　　   1
+#define MOVE_THREE              40     //三　　　 2
+#define MOVE_JUMP_FOUR          53     //飛び四　 3
+#define MOVE_JUMP_THREE         39     //飛び三   4 
+#define MOVE_FOUR_FOUR          75     //四四     5
+#define MOVE_FOUR_THREE         70     //四三     6
+#define MOVE_THREE_THREE        65     //三三     7
+#define MOVE_FORBIDDEN          0      //禁じ手   
+#define MOVE_NO_POINT           5      //評価無し 8
+
+#define PREVENT_WIN             80     //相手の勝ちを防ぐ
+#define PREVENT_THREE           55     //相手の三を防ぐ       9
+#define PREVENT_J_THREE         53     //相手の三を防ぐ       10
+#define PREVENT_B_THREE         50     //相手の三を挟んで防ぐ  11
+#define PREVENT_B_J_THREE       49     //相手の三を挟んで防ぐ  12
+#define PREVENT_TWO             10     //相手の二を防ぐ       13
+#define PREVENT_J_TWO           9      //相手の二を防ぐ       14
+#define PREVENT_B_TWO           7      //相手の二を挟んで防ぐ  15
+#define PREVENT_B_J_TWO         6      //相手の二を挟んで防ぐ  16
+
 
 #define SEARCH_DEPTH             2     //探索の深さ
 #define DIRECTION                8     //評価時の検索8方向
@@ -31,9 +40,12 @@
 #define STATE_O                  7
 #define STATE_V                  8
 
-void move(char *input);
+void move(char *input, int player);
 int  minMax(int level, int player, int putX, int putY, int beforeBranchScore);
 int  evaluation(int putX, int putY, int player);
 int  countStone(unsigned int sta[], int player, int putX, int putY, int direction);
 int  getPatern(unsigned int sta[], int direction);
-int  getEvaluationPoint(int total,int patern1, int patern2);
+int  getEvaluationPoint(int player, int total,int patern1, int patern2);
+int  getPreventPatern(int player, int putX, int putY, int direction);
+int  getPreventEvaluationPoint(int patern1, int patern2);
+
