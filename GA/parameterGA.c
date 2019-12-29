@@ -240,10 +240,35 @@ void crossover(int remainGenetic[])
             n = r;
 
             int turn = 0;
-            while(r == n)
+            int selectFlag = 1;
+            while(selectFlag)
             {
                 srand((unsigned int)time(NULL) + turn); 
                 n = rand() % 5;
+
+                int c;
+                for(c = 0; c < REMAIN_GENETIC_NUM; c++)
+                {
+                    if(r == remainGenetic[c])
+                    {
+                        if(c % 2 == 0)
+                        {
+                            if(n != remainGenetic[c + 1])
+                            {
+                                selectFlag = 0;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if(n != remainGenetic[c - 1])
+                            {
+                                selectFlag = 0;
+                                break;
+                            }
+                        }
+                    }
+                }
                 turn++;
             }
 
