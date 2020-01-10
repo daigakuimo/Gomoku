@@ -21,16 +21,26 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	board[7][7]     = 2;
-	tempBoard[7][7] = 2;
+	battingFirstPlayer = AI;
+
+	board[7][7]     = 1;
+	tempBoard[7][7] = 1;
 
 	board[6][8]     = 1;
 	tempBoard[6][8] = 1;
 
-	board[6][9]     = 1;
-	tempBoard[6][9] = 1;
+	board[5][9]     = 1;
+	tempBoard[5][9] = 1;
+
+	board[6][6]     = 2;
+	tempBoard[6][6] = 2;
+
+	board[5][5]     = 2;
+	tempBoard[5][5] = 2;
 
 	display(1);
+
+	turnCount = 4;
 
 	char input[256];
 	move(input,AI);

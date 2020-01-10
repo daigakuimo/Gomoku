@@ -13,6 +13,8 @@ extern int evaluationPaternGenetic[GENETIC_NUM][EVALUATION_PATERN_NUM];
 extern int GAflag;
 extern int genetic;
 
+int turn = 0;
+
 
 /* ====================================================================== */
 /**
@@ -193,6 +195,7 @@ void crossover(int remainGenetic[])
         }
     }
 
+
     int remainIndex = 0;
     srand((unsigned int)time(NULL));
     int t = rand() % 3;
@@ -228,21 +231,21 @@ void crossover(int remainGenetic[])
                     }
                 }
             }
+
             
             remainIndex += 2;
         }
         else
         {
             int r,n;
-            srand((unsigned int)time(NULL)); 
-            r = rand() % 5; 
 
-            n = r;
-
-            int turn = 0;
             int selectFlag = 1;
+
             while(selectFlag)
             {
+                srand((unsigned int)time(NULL) + turn * 10000); 
+                r = rand() % 5;
+
                 srand((unsigned int)time(NULL) + turn); 
                 n = rand() % 5;
 
@@ -253,16 +256,21 @@ void crossover(int remainGenetic[])
                     {
                         if(c % 2 == 0)
                         {
-                            if(n != remainGenetic[c + 1])
+                            printf("%d = %d\n",n, remainGenetic[c + 1]);
+                            if(n != r + 1)
                             {
+                                printf("r = %d\n",r);
+                                printf("%d = %d\n",n, remainGenetic[c + 1]);
                                 selectFlag = 0;
                                 break;
                             }
                         }
                         else
                         {
-                            if(n != remainGenetic[c - 1])
+                            if(n != r - 1)
                             {
+                                printf("r = %d\n",r);
+                                printf("%d = %d\n",n, remainGenetic[c - 1]);
                                 selectFlag = 0;
                                 break;
                             }
@@ -271,7 +279,6 @@ void crossover(int remainGenetic[])
                 }
                 turn++;
             }
-
             
             
             for(j = 0; j < EVALUATION_PATERN_NUM; j++)
@@ -303,14 +310,16 @@ void mutation()
     int mutationIndex;
     int mutationValue;
 
-    srand((unsigned int)time(NULL)); 
+    srand((unsigned int)time(NULL) + turn); 
     mutationGenetic = rand() % (GENETIC_NUM - 1) + 1;
 
-    srand((unsigned int)time(NULL) + 1); 
+    srand((unsigned int)time(NULL) + turn + 300); 
     mutationIndex = rand() % EVALUATION_PATERN_NUM;
 
-    srand((unsigned int)time(NULL) + 2); 
+    srand((unsigned int)time(NULL) + turn * 300); 
     mutationValue = rand() % 99 + 1;
+
+    printf("%d,%d,%d\n",mutationGenetic,mutationIndex,mutationValue);
 
     evaluationPaternGenetic[mutationGenetic][mutationIndex] = mutationValue;
 

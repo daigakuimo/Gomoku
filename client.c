@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 		printf("Å® %s\n\n", buffer);
 		
 		controller = insertBoard(buffer,ENEMY);
-		display(1);
+		display(0);
 
 		if(controller == END)
 		{
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 		send(s, input, strlen(input), 0);
 
 		insertBoard(input,AI);
-		display(1);
+		display(0);
 
 		turnCount++;
 

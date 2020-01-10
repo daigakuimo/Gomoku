@@ -128,6 +128,7 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
 
     //禁じ手ならこれ以上探索せずに評価値を返す
 
+
     //探索する深さの制限に達すると手を評価する
     if(level == 0)
     {
@@ -326,8 +327,6 @@ int evaluation(int putX, int putY, int player)
     {
         returnScore = maxScore;
     }
-
-    tempBoard[putY][putX] = EMPTY;
 
     return returnScore;
 }
