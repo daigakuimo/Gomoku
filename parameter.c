@@ -133,7 +133,7 @@ int insertBoard(char *data, int player)
 
 	if(battingFirstPlayer == player)
 	{
-		if(evaluation(x-1,y-1,player) == MOVE_FORBIDDEN)
+		if(evaluation(x-1,y-1,player,0) == MOVE_FORBIDDEN)
 		{
 			return ENEMY_FORBIDDEN;
 		}

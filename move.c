@@ -21,14 +21,16 @@ extern int genetic;
 /* ====================================================================== */
 void move(char *input, int player)
 {
-    int maxScore     = INT_MIN;
-    int minScore     = INT_MAX;
+    int maxScore         = INT_MIN;
+    int minScore         = INT_MAX;
     int score;
     int bestX = 0, bestY = 0;
-    int searchStartX  = 0;
-    int searchStartY  = 0;
-    int searchFinishX = BOARD_MAX;
-    int searchFinishY = BOARD_MAX;
+    int searchStartX     = 0;
+    int searchStartY     = 0;
+    int searchFinishX    = BOARD_MAX;
+    int searchFinishY    = BOARD_MAX;
+    int evaluationScore  = 0;
+    int flag = 1;
 
     if(turnCount < 3)
     {
@@ -57,11 +59,22 @@ void move(char *input, int player)
             tempBoard[y][x] = player;
 
             //ミニマックス法で評価値を得る
-            //score = minMax(SEARCH_DEPTH, ENEMY, x, y, minScore);
-            score = evaluation(x,y,player);
+            score = minMax(SEARCH_DEPTH, player, x, y, maxScore, evaluationScore);
+            //score = evaluation(x,y,player);
 
             // printf("%d,%d\n", x, y);
             // printf("move-score:%d\n",score);
+
+            if(score == MOVE_WIN || score == MOVE_WIN_FOUR)
+            {
+                maxScore = score;
+                bestX = x;
+                bestY = y;
+                tempBoard[y][x] = EMPTY;
+                printf("gaga: x:%d, y:%d, maxScore:%d\n",x+1,y+1,maxScore);
+                flag = 0;
+                break;
+            }
 
             //評価値が一番高い手を選ぶ
             if(score > maxScore)
@@ -69,12 +82,17 @@ void move(char *input, int player)
                 maxScore = score;
                 bestX = x;
                 bestY = y;
-                //printf("maxScore:%d\n",maxScore);
+                //printf("x:%d, y:%d, maxScore:%d\n",x+1,y+1,maxScore);
             }
 
             //仮で打った石を消す
             tempBoard[y][x] = EMPTY;
             
+        }
+        
+        if(!flag)
+        {
+            break;
         }
     }
     
@@ -106,13 +124,17 @@ void move(char *input, int player)
  * @return  評価値(整数)
  */
 /* ====================================================================== */
-int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
+int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, int evaluationTotalScore)
 {
-    int maxScore    = INT_MIN;
-    int minScore    = INT_MAX;
-    int returnScore = 0;
+    int maxScore        = INT_MIN;
+    int minScore        = INT_MAX;
+    int evaluationScore = 0;
+    int returnScore     = 0;
+    int bestX = 0;
+    int bestY = 0;
     int score;
     int nextPlayer;
+    int flag = 1;
 
     if(player == AI)
     {
@@ -126,65 +148,82 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
     //printf("%d\n",level);
     //printf("beforeBranchScore : %d\n", beforeBranchScore);
 
-    //禁じ手ならこれ以上探索せずに評価値を返す
+    //置いた石の評価を返す
+    evaluationScore = evaluation(putX,putY,player,level);
 
-
-    //探索する深さの制限に達すると手を評価する
-    if(level == 0)
+    if(evaluationScore == MOVE_WIN || evaluationScore == -MOVE_WIN || evaluationScore == MOVE_FORBIDDEN || evaluationScore == MOVE_WIN_FOUR || evaluationScore == -MOVE_WIN_FOUR)
     {
-        return evaluation(putX,putY,nextPlayer);
+        return evaluationScore;
     }
 
+    evaluationTotalScore += evaluationScore;
+
+    if(level == 0)
+    {
+        return evaluationTotalScore;
+    }
+    
+    int searchStartX     = 0;
+    int searchStartY     = 0;
+    int searchFinishX    = BOARD_MAX;
+    int searchFinishY    = BOARD_MAX;
+
+    if(turnCount < 3)
+    {
+        searchStartX  = 6;
+        searchStartY  = 6;
+        searchFinishX = 9;
+        searchFinishY = 9;
+    }
+    else if(turnCount < 6)
+    {
+        searchStartX  = 5;
+        searchStartY  = 5;
+        searchFinishX = 10;
+        searchFinishY = 10;
+    }
 
     int y,x;
-    for(y = 5; y < BOARD_MAX-6; y++)
+    for(y = searchStartY; y < searchFinishY; y++)
     {
-        for(x = 5; x < BOARD_MAX-6; x++)
+        for(x = searchStartX; x < searchFinishX; x++)
         {
             //石が置いてある場所は探索しない
             if(tempBoard[y][x] != EMPTY) continue;
 
             //仮で石を打つ
-            tempBoard[y][x] = player;
+            tempBoard[y][x] = nextPlayer;
 
             //ミニマックス法で評価値を得る
-            if(nextPlayer == AI)
+            if(level % 2 == 1)
             {
-                score = minMax(level-1, nextPlayer, x, y, maxScore);
+                score = minMax(level-1, nextPlayer, x, y, maxScore, evaluationTotalScore);
             }
             else
             {
-                score = minMax(level-1, nextPlayer, x, y, minScore);
+                score = minMax(level-1, nextPlayer, x, y, minScore,evaluationTotalScore);
             }
-
-            if(level == 1)
-            {
-                tempBoard[y][x] = EMPTY;
-                printf("level-score:%d\n",score);
-                return score;
-            }
-            
         
-            if(player == AI)
+            if(level % 2 == 0)
             {
                 //printf("AI\n");
                 //評価値が一番低い手を選ぶ
                 if(score < minScore)
                 {
-                    printf("AI:%d\n",score);
                     minScore = score;
+                    bestX = x;
+                    bestY = y;
                 }
 
-                if(beforeBranchScore > minScore)
+                if(minScore <= beforeBranchScore && beforeBranchScore != INT_MAX)
                 {
                     //仮で打った石を消す
-                    printf("αカット\n");
-                    printf("beforeBranchScore : %d > minScore : %d\n", beforeBranchScore, minScore);
+                    // printf("αカット\n");
+                    // printf("minScore : %d <= beforeBranchScore : %d\n", minScore, beforeBranchScore);
                     tempBoard[y][x] = EMPTY;
+                    flag = 0;
                     break;
                 }
-
-
             }
             else
             {
@@ -192,16 +231,18 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
                 //評価値が一番高い手を選ぶ
                 if(score > maxScore)
                 {
-                    printf("ENEMY:%d\n",score);
                     maxScore = score;
+                    bestX = x;
+                    bestY = y;
                 }
 
-                if(beforeBranchScore < maxScore)
+                if(maxScore >= beforeBranchScore && beforeBranchScore != INT_MIN)
                 {
                     //仮で打った石を消す
-                    printf("βカット\n");
-                    printf("beforeBranchScore : %d < maxScore : %d\n", beforeBranchScore, maxScore);
+                    // printf("βカット\n");
+                    // printf("maxScore : %d >= beforeBranchScore : %d\n", maxScore, beforeBranchScore);
                     tempBoard[y][x] = EMPTY;
+                    flag = 0;
                     break;
                 }
             }
@@ -210,9 +251,13 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
             tempBoard[y][x] = EMPTY;
             
         }
+        if(!flag)
+        {
+            break;
+        }
     }
 
-    if(player == AI)
+    if(level % 2 == 0)
     {
         returnScore = minScore;
     }
@@ -221,7 +266,7 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
         returnScore = maxScore;
     }
 
-    printf("retutnScore:%d\n",returnScore);
+    //printf("x:%d, y:%d, retutnScore:%d\n",bestX + 1, bestY + 1,returnScore);
     return returnScore;
 }
 
@@ -234,11 +279,9 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
  * @return  評価値(整数)
  */
 /* ====================================================================== */
-int evaluation(int putX, int putY, int player)
+int evaluation(int putX, int putY, int player, int level)
 {
     int score;
-    int maxScore    = INT_MIN;
-    int minScore    = INT_MAX;
     int returnScore = 0;
 
     int fourCount   = 0;
@@ -279,11 +322,19 @@ int evaluation(int putX, int putY, int player)
 
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
-        directionPoint[m] =getEvaluationPoint(player,total[m],patern[m],patern[m + 4]);
+        directionPoint[m] = getEvaluationPoint(player,total[m],patern[m],patern[m + 4]);
         
-        if(directionPoint[m] > maxScore)
+        if(directionPoint[m] == MOVE_WIN || directionPoint[m] == MOVE_WIN_FOUR)
         {
-            maxScore = directionPoint[m];
+            if(level % 2 == 0)
+            {
+                return MOVE_WIN;
+            }
+            else
+            {
+                return -MOVE_WIN;
+            }
+            
         }
 
         if(directionPoint[m] == MOVE_FOUR)
@@ -310,22 +361,32 @@ int evaluation(int putX, int putY, int player)
     for(m = 0; m < TOTAL_DIRECTION; m++)
     {
         directionPreventPoint[m] = getPreventEvaluationPoint(preventPatern[m],preventPatern[m + 4]);
-
-        if(directionPreventPoint[m] > maxScore)
-        {
-            maxScore = directionPreventPoint[m];
-        }
     }
     
 
     // 禁じ手か判断
     if(battingFirstPlayer == player && (fourCount >= 2 || threeCount >= 2))
     {
-        returnScore = MOVE_FORBIDDEN;
+        return MOVE_FORBIDDEN;
     }
     else
     {
-        returnScore = maxScore;
+        for(m = 0; m < TOTAL_DIRECTION; m++)
+        {
+            if(directionPoint[m] > directionPreventPoint[m])
+            {
+                returnScore += directionPoint[m];
+            }
+            else
+            {
+                returnScore += directionPreventPoint[m];
+            }
+        }
+    }
+
+    if(level % 2 == 1)
+    {
+        return -returnScore;
     }
 
     return returnScore;

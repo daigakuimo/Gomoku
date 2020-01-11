@@ -1,8 +1,8 @@
 #pragma once
 
 //評価値
-#define MOVE_WIN                100    //勝ち確
-#define MOVE_WIN_FOUR           90     //勝利四   0  
+#define MOVE_WIN                1000    //勝ち確
+#define MOVE_WIN_FOUR           990     //勝利四   0  
 #define MOVE_FOUR               50     //四　　   1
 #define MOVE_THREE              40     //三　　　 2
 #define MOVE_JUMP_FOUR          53     //飛び四　 3
@@ -41,8 +41,8 @@
 #define STATE_V                  8
 
 void move(char *input, int player);
-int  minMax(int level, int player, int putX, int putY, int beforeBranchScore);
-int  evaluation(int putX, int putY, int player);
+int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, int evaluationTotalScore);
+int  evaluation(int putX, int putY, int player, int level);
 int  countStone(unsigned int sta[], int player, int putX, int putY, int direction);
 int  getPatern(unsigned int sta[], int direction);
 int  getEvaluationPoint(int player, int total,int patern1, int patern2);
