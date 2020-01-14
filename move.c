@@ -160,7 +160,7 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
             if(level == 1)
             {
                 tempBoard[y][x] = EMPTY;
-                printf("level-score:%d\n",score);
+                //printf("level-score:%d\n",score);
                 return score;
             }
             
@@ -171,15 +171,15 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore)
                 //評価値が一番低い手を選ぶ
                 if(score < minScore)
                 {
-                    printf("AI:%d\n",score);
+                    //printf("AI:%d\n",score);
                     minScore = score;
                 }
 
                 if(beforeBranchScore > minScore)
                 {
                     //仮で打った石を消す
-                    printf("αカット\n");
-                    printf("beforeBranchScore : %d > minScore : %d\n", beforeBranchScore, minScore);
+                    // printf("αカット\n");
+                    // printf("beforeBranchScore : %d > minScore : %d\n", beforeBranchScore, minScore);
                     tempBoard[y][x] = EMPTY;
                     break;
                 }
@@ -286,11 +286,16 @@ int evaluation(int putX, int putY, int player)
             maxScore = directionPoint[m];
         }
 
-        if(directionPoint[m] == MOVE_FOUR)
+        if(battingFirstPlayer == player && (directionPoint[m] == MOVE_FOUR_FOUR || directionPoint[m] == MOVE_THREE_THREE))
+        {
+            return MOVE_FORBIDDEN;
+        }
+
+        if(directionPoint[m] == MOVE_FOUR || directionPoint[m] == MOVE_JUMP_FOUR)
         {
             fourCount++;
         }
-        else if(directionPoint[m] == MOVE_THREE)
+        else if(directionPoint[m] == MOVE_THREE || directionPoint[m] == MOVE_JUMP_THREE )
         {
             threeCount++;
         }
