@@ -1,8 +1,8 @@
 #pragma once
 
 //評価値
-#define MOVE_WIN                1000    //勝ち確
-#define MOVE_WIN_FOUR           990     //勝利四   0  
+#define MOVE_WIN                10000    //勝ち確
+#define MOVE_WIN_FOUR           800     //勝利四   0  
 #define MOVE_FOUR               50     //四　　   1
 #define MOVE_THREE              40     //三　　　 2
 #define MOVE_JUMP_FOUR          53     //飛び四　 3
@@ -13,13 +13,13 @@
 #define MOVE_FORBIDDEN          0      //禁じ手   
 #define MOVE_NO_POINT           5      //評価無し 8
 
-#define PREVENT_WIN             80     //相手の勝ちを防ぐ
-#define PREVENT_THREE           55     //相手の三を防ぐ       9
-#define PREVENT_J_THREE         53     //相手の三を防ぐ       10
-#define PREVENT_B_THREE         50     //相手の三を挟んで防ぐ  11
-#define PREVENT_B_J_THREE       49     //相手の三を挟んで防ぐ  12
-#define PREVENT_TWO             10     //相手の二を防ぐ       13
-#define PREVENT_J_TWO           9      //相手の二を防ぐ       14
+#define PREVENT_WIN             900     //相手の勝ちを防ぐ
+#define PREVENT_THREE           700     //相手の三を防ぐ       9
+#define PREVENT_J_THREE         600     //相手の三を防ぐ       10
+#define PREVENT_B_THREE         500     //相手の三を挟んで防ぐ  11
+#define PREVENT_B_J_THREE       400     //相手の三を挟んで防ぐ  12
+#define PREVENT_TWO             300     //相手の二を防ぐ       13
+#define PREVENT_J_TWO           200      //相手の二を防ぐ       14
 #define PREVENT_B_TWO           7      //相手の二を挟んで防ぐ  15
 #define PREVENT_B_J_TWO         6      //相手の二を挟んで防ぐ  16
 

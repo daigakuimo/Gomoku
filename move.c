@@ -189,7 +189,11 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, in
         for(x = searchStartX; x < searchFinishX; x++)
         {
             //石が置いてある場所は探索しない
-            if(tempBoard[y][x] != EMPTY) continue;
+            if(tempBoard[y][x] != EMPTY)
+            { 
+                //printf("continue x:%d, y:%d\n",x+1,y+1);
+                continue;
+            }
 
             //仮で石を打つ
             tempBoard[y][x] = nextPlayer;
@@ -217,9 +221,10 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, in
 
                 if(minScore <= beforeBranchScore && beforeBranchScore != INT_MAX)
                 {
-                    //仮で打った石を消す
-                    // printf("αカット\n");
-                    // printf("minScore : %d <= beforeBranchScore : %d\n", minScore, beforeBranchScore);
+                    // 仮で打った石を消す
+                    // printf("αカットx:%d, y:%d\n",x+1,y+1);
+                    // printf("AI minScore : %d <= beforeBranchScore : %d\n", minScore, beforeBranchScore);
+                    // display(0);
                     tempBoard[y][x] = EMPTY;
                     flag = 0;
                     break;
@@ -239,8 +244,9 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, in
                 if(maxScore >= beforeBranchScore && beforeBranchScore != INT_MIN)
                 {
                     //仮で打った石を消す
-                    // printf("βカット\n");
-                    // printf("maxScore : %d >= beforeBranchScore : %d\n", maxScore, beforeBranchScore);
+                    // printf("βカット x:%d, y:%d\n",x+1,y+1);
+                    // printf("ENEMY maxScore : %d >= beforeBranchScore : %d\n", maxScore, beforeBranchScore);
+                    // display(0);
                     tempBoard[y][x] = EMPTY;
                     flag = 0;
                     break;
@@ -266,7 +272,7 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, in
         returnScore = maxScore;
     }
 
-    //printf("x:%d, y:%d, retutnScore:%d\n",bestX + 1, bestY + 1,returnScore);
+    //printf("level:%d, x:%d, y:%d, retutnScore:%d\n",level, bestX + 1, bestY + 1,returnScore);
     return returnScore;
 }
 
@@ -336,12 +342,16 @@ int evaluation(int putX, int putY, int player, int level)
             }
             
         }
+        else if(battingFirstPlayer == player && (directionPoint[m] == MOVE_FORBIDDEN || directionPoint[m] == MOVE_FOUR_FOUR || directionPoint[m] == MOVE_THREE_THREE))
+        {
+            return MOVE_FORBIDDEN;
+        }
 
-        if(directionPoint[m] == MOVE_FOUR)
+        if(directionPoint[m] == MOVE_FOUR || directionPoint[m] == MOVE_JUMP_FOUR)
         {
             fourCount++;
         }
-        else if(directionPoint[m] == MOVE_THREE)
+        else if(directionPoint[m] == MOVE_THREE || directionPoint[m] == MOVE_JUMP_THREE )
         {
             threeCount++;
         }
