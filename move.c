@@ -151,7 +151,7 @@ int  minMax(int level, int player, int putX, int putY, int beforeBranchScore, in
     //置いた石の評価を返す
     evaluationScore = evaluation(putX,putY,player,level);
 
-    if(evaluationScore == MOVE_WIN || evaluationScore == -MOVE_WIN || evaluationScore == MOVE_FORBIDDEN || evaluationScore == MOVE_WIN_FOUR || evaluationScore == -MOVE_WIN_FOUR)
+    if(evaluationScore == MOVE_WIN || evaluationScore == -MOVE_WIN || evaluationScore == MOVE_FORBIDDEN)
     {
         return evaluationScore;
     }
@@ -330,7 +330,7 @@ int evaluation(int putX, int putY, int player, int level)
     {
         directionPoint[m] = getEvaluationPoint(player,total[m],patern[m],patern[m + 4]);
         
-        if(directionPoint[m] == MOVE_WIN || directionPoint[m] == MOVE_WIN_FOUR)
+        if(directionPoint[m] == MOVE_WIN)
         {
             if(level % 2 == 0)
             {

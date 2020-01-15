@@ -13,7 +13,7 @@
 #define MOVE_FORBIDDEN          0      //禁じ手   
 #define MOVE_NO_POINT           5      //評価無し 8
 
-#define PREVENT_WIN             900     //相手の勝ちを防ぐ
+#define PREVENT_WIN             8000     //相手の勝ちを防ぐ
 #define PREVENT_THREE           700     //相手の三を防ぐ       9
 #define PREVENT_J_THREE         600     //相手の三を防ぐ       10
 #define PREVENT_B_THREE         500     //相手の三を挟んで防ぐ  11
